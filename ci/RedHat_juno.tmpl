@@ -1,6 +1,13 @@
 #!/bin/bash
 set -x
 
+# add 163 repo
+yum install wget -y
+wget -O /etc/yum.repos.d/CentOS7-Base-163.repo  http://mirrors.163.com/.help/CentOS7-Base-163.repo
+rm -f /etc/yum.repos.d/CentOS-*.repo
+yum clean all
+yum repolist
+
 # add openstack juno repo
 yum install yum-plugin-priorities -y
 yum install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm -y  

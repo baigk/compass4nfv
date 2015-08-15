@@ -4,8 +4,8 @@ mysql_packages:
   - mysql-server
 
 maridb_packages:
-  - MariaDB-client
-  - MariaDB-server
+  - mysql-wsrep-client-5.5
+  - mysql-wsrep-server-5.5
   - galera
 
 services: []

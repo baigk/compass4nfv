@@ -1,6 +1,8 @@
 function reboot_hosts() {
-   cmd='for i in {14..18}; do /dev/shm/smm/usr/bin/smmset -l blade$i -d bootoption -v 1 0; echo Y | /dev/shm/smm/usr/bin/smmset -l blade$i -d frucontrol -v 0; done'
-   /usr/bin/expect ${COMPASS_DIR}/deploy/remote_excute.exp ${SWITCH_IPS} 'root' 'Admin@7*24' "$cmd"
+    if [ -z $POWER_MANAGE ]; then
+        return
+
+    . $POWER_MANAGE
 }
 
 function get_host_macs() {

@@ -10,8 +10,7 @@ function prepare_env() {
     sudo service libvirt-bin restart
    
     # prepare work dir
-    sudo rm -rf $WORK_DIR
-    mkdir -p $WORK_DIR
+    rm -rf $WORK_DIR/{installer,vm,network,iso,venv}
     mkdir -p $WORK_DIR/installer
     mkdir -p $WORK_DIR/vm
     mkdir -p $WORK_DIR/network
@@ -20,6 +19,9 @@ function prepare_env() {
 
     if [[ ! -f centos.iso ]];then
         curl -o $WORK_DIR/iso/centos.iso $ISO_URL
+        if [ ! -f $WORK_DIR/iso/centos.iso ]; then
+            exit 1
+        fi
     fi
 
     # copy compass

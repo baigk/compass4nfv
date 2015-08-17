@@ -10,7 +10,7 @@ COMPASS_CORE=${COMPASS_CORE:-http://github.com/baigk/compass-core.git}
 COMPASS_WEB=${COMPASS_WEB:-http://github.com/baigk/compass-web.git}
 COMPASS_INSTALL=${COMPASS_INSTALL:-http://github.com/baigk/compass-install.git}
 
-PACKAGE_URL=${PACKAGE_URL:-http://192.168.127.11:9999/xh/work/package}
+PACKAGE_URL=${PACKAGE_URL:-http://192.168.50.40:9999}
 
 cd $WORK_DIR
 

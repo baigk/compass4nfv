@@ -1,28 +1,23 @@
 #set -x
 WORK_DIR=$COMPASS_DIR/ci/work
 
-if [[ $# -ge 1 ]];then
-    CONF_NAME=$1
-else
-    CONF_NAME=cluster
-fi
+mkdir -p $WORK_DIR/script
 
 source ${COMPASS_DIR}/ci/log.sh
-source ${COMPASS_DIR}/deploy/conf/${CONF_NAME}.conf
+source ${COMPASS_DIR}/ci/deploy_parameter.sh
+source $(process_default_para $*) || exit 1
+source $(process_input_para $*) || exit 1
+source ${COMPASS_DIR}/deploy/conf/${TYPE}_${FLAVOR}.conf
+source ${COMPASS_DIR}/deploy/conf/${FLAVOR}.conf
+source ${COMPASS_DIR}/deploy/conf/${TYPE}.conf
+source ${COMPASS_DIR}/deploy/conf/base.conf
 source ${COMPASS_DIR}/deploy/prepare.sh
 source ${COMPASS_DIR}/deploy/network.sh
-
-if [[ ! -z $VIRT_NUMBER ]];then
-    source ${COMPASS_DIR}/deploy/host_vm.sh
-else
-    source ${COMPASS_DIR}/deploy/host_baremetal.sh
-fi
-
+source ${COMPASS_DIR}/deploy/host_${TYPE}.sh
 source ${COMPASS_DIR}/deploy/compass_vm.sh
 source ${COMPASS_DIR}/deploy/deploy_host.sh
 
 ######################### main process
-
 if ! prepare_env;then
     echo "prepare_env failed"
     exit 1

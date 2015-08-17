@@ -20,12 +20,14 @@ if [[ ! -d ${REPO_PATH} ]]; then
     mkdir -p ${REPO_PATH}
 fi
 
+set +e
 docker info
 if [[ $? != 0 ]]; then
     wget -qO- https://get.docker.com/ | sh
 else
     echo "docker is already installed!"
 fi
+set -e
 
 if [[ -e ${WORK_PATH}/cp_repo.sh ]]; then
     rm -f ${WORK_PATH}/cp_repo.sh

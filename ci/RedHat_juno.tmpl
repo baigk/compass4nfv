@@ -1,36 +1,51 @@
 #!/bin/bash
-set -ex
+set -x
+
+# add 163 repo
+yum install wget -y
+wget -O /etc/yum.repos.d/CentOS7-Base-163.repo  http://mirrors.163.com/.help/CentOS7-Base-163.repo
+rm -f /etc/yum.repos.d/CentOS-*.repo
+yum clean all
+yum repolist
 
 # add openstack juno repo
-sudo apt-get update && apt-get install -y software-properties-common
-sudo add-apt-repository -y cloud-archive:juno
+yum install yum-plugin-priorities -y
+yum install http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm -y  
+yum install http://rdo.fedorapeople.org/openstack-juno/rdo-release-juno.rpm -y 
+
+# modify centos7 repo for workaround
+sed -i 's/epel-Derived from Red Hat Enterprise Linux 7.1 (Source)/epel-7/g' /etc/yum.repos.d/rdo-release.repo
 
 # add galeracluster repo 
-sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 D669017EBC19DDBA
-sudo add-apt-repository 'deb http://releases.galeracluster.com/ubuntu trusty main'
+cat <<EOF >/etc/yum.repos.d/galera-cluster.repo
+[galera-cluster]
+name=galera cluster repository
+baseurl=http://releases.galeracluster.com/centos/7/x86_64/
+enabled=1
+skip_if_unavailable=0
+gpgcheck=1
+gpgkey=http://releases.galeracluster.com/GPG-KEY-galeracluster.com
+EOF
 
-sudo apt-get update
- 
-sudo apt-get install reprepro -y
+yum update -y
+yum install createrepo -y
+yum install tar -y
 
 #download packages
 #set packages = $getVar('packages', [])
 
 #for pkg in $packages
-sudo apt-get -d install $pkg -y
+yum -y install $pkg --downloadonly
 #end for
 
 #make repo
-mkdir -p trusty-juno-ppa/conf
-cat <<EOF > trusty-juno-ppa/conf/distributions
-Codename: trusty
-Components: main
-Architectures: amd64
-EOF
 
-mkdir deb
-find /var/cache/apt/ -name *.deb | xargs -i cp {} deb
+mkdir -p /centos7-juno-ppa/{Packages,repodata}
 
-reprepro -b trusty-juno-ppa includedeb trusty deb/*.deb
+find /var/cache/yum/ -name *.rpm | xargs -i cp {} /centos7-juno-ppa/Packages/
 
-tar -zcvf /trusty-juno-ppa.tar.gz ./trusty-juno-ppa
+cp /centos7-comps.xml /centos7-juno-ppa/
+createrepo -g centos7-comps.xml /centos7-juno-ppa 
+tar -zcvf /centos7-juno-ppa.tar.gz /centos7-juno-ppa
+
+

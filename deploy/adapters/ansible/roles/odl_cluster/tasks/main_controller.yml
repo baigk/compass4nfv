@@ -1,5 +1,5 @@
 ---
-- name: install java8 packages
+- name: install java7777777 packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items: packages | union(packages_noarch)
 

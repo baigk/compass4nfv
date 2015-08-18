@@ -9,19 +9,13 @@ OPENSTACK_TAG="juno"
 DOCKER_TAG="${UBUNTU_TAG}/openstack-${OPENSTACK_TAG}"
 DOCKER_FILE=${WORK_PATH}/${UBUNTU_TAG}/${OPENSTACK_TAG}/Dockerfile
 DEPLOY_SCRIPT_PATH="$1"
-#DEPLOY_SCRIPT_PATH="/home/chigang/code/compass4nfv/deploy/adapters/ansible/"
-
-if [[ $UID != 0 ]]; then
-    echo "You are not root user!"
-    exit 1
-fi
 
 if [[ ! -d ${REPO_PATH} ]]; then
     mkdir -p ${REPO_PATH}
 fi
 
 set +e
-docker info
+sudo docker info
 if [[ $? != 0 ]]; then
     wget -qO- https://get.docker.com/ | sh
 else

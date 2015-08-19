@@ -1,5 +1,5 @@
 ---
-- name: install java7777777 packages
+- name: install java packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items: packages | union(packages_noarch)
 
@@ -39,8 +39,8 @@
   notify:
     - restart odl service
 
-#- name: opendaylight systemd file
-#  template: src=opendaylight.service dest=/usr/lib/systemd/system/opendaylight.service mode=0644
+- name: opendaylight system file
+  template: src={{ service_file.src }} dest={{ service_file.dst }} mode=0644
 
 - name: create karaf config
   template:

@@ -1,0 +1,9 @@
+---
+
+packages:
+  - java-1.7.0-openjdk
+
+
+service_file:
+  - src: opendaylight.service
+    dst: /usr/lib/systemd/system/opendaylight.service

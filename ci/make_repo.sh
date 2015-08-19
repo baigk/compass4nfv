@@ -38,8 +38,8 @@ if [[ -e ${WORK_PATH}/install_packeages.sh ]]; then
 fi
 
 # generate ubuntu 14.04 ppa
-apt-get install python-yaml -y
-apt-get install python-cheetah -y
+sudo apt-get install python-yaml -y
+sudo apt-get install python-cheetah -y
 
 python gen_ins_pkg_script.py ${DEPLOY_SCRIPT_PATH} Debian Debian_juno.tmpl
 

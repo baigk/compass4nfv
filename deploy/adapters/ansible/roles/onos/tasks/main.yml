@@ -32,15 +32,46 @@
     export JAVA_HOME=/usr/lib/jvm/java-8-oracle;
     export DERBY_HOME=/usr/lib/jvm/java-8-oracle/db;
 
+- name: create onos group
+  group: name=onos system=yes state=present
+
+- name: create onos user
+  user:
+    name: onos
+    group: onos
+    home: "{{ onos_home }}"
+    createhome: "yes"
+    system: "yes"
+    shell: "/bin/false"
+
 - name: download onos package
   get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/onos/{{ onos_pkg_name }}"  dest=/opt/{{ onos_pkg_name }}
 
-# TODO: unarchive doesn't support strip-component at the moment
-# TODO: switch to use untar after support is added.
+- name: create new jar repository
+  command: su -s /bin/sh -c "mkdir ~/.m2"
+
+- name: download jar repository
+  get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/onos/repository.tar"  dest=~/.m2/
+
+- name: extract jar repository
+  command: su -s /bin/sh -c "tar xvf  ~/.m2/repository.tar -C ~/.m2/"
+
 - name: extract onos package
-  command: su -s /bin/sh -c "tar xzf /opt/{{ onos_pkg_name }} -C /opt/"
+  command: su -s /bin/sh -c "tar xzf /opt/{{ onos_pkg_name }} -C {{ onos_home }} --strip-components 1 --no-overwrite-dir -k --skip-old-files" onos
+
+- name: configure onos service
+  shell: >
+    echo 'export ONOS_OPTS=debug' > {{ onos_home }}/options;
+    echo 'export ONOS_USER=root' >> {{ onos_home }}/options;
+    mkdir {{ onos_home }}/var;
+    mkdir {{ onos_home }}/config;
+    sed -i '/pre-stop/i\env JAVA_HOME=/usr/lib/jvm/java-8-oracle' {{ onos_home }}/debian/onos.conf;
+    cp -rf {{ onos_home }}/debian/onos.conf /etc/init/;
   notify:
     - restart onos service
+- name: configure onos boot feature
+  shell: >
+    sed -i '/^featuresBoot=/c\featuresBoot={{ onos_boot_features }}' {{ onos_home }}/{{ karaf_dist }}/etc/org.apache.karaf.features.cfg;
 
 
 ##########################################################################################################
@@ -60,7 +91,7 @@
     service openvswitch-switch start ;
 
 - name: Set ONOS as the manager
-  command: su -s /bin/sh -c "ovs-vsctl set-manager tcp:127.0.0.1:6640;"
+  command: su -s /bin/sh -c "ovs-vsctl set-manager tcp:{{ internal_ip }}:6640;"
 
 - name: Configure Neutron1
   shell: >

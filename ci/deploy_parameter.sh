@@ -39,7 +39,7 @@ function get_conf_name()
 
 function generate_input_env_file()
 {
-    ofile="$COMPASS_DIR/ci/work/script/deploy_input.sh"
+    ofile="$WORK_DIR/script/deploy_input.sh"
 
     echo  '#input deployment  parameter' > $ofile
 
@@ -77,10 +77,10 @@ function process_default_para()
     python ${COMPASS_DIR}/deploy/config_parse.py \
            "${COMPASS_DIR}/deploy/conf/`get_conf_name $*`" \
            "${COMPASS_DIR}/deploy/template" \
-           "${COMPASS_DIR}/ci/work/script" \
+           "${WORK_DIR}/script" \
            "deploy_config.sh"
 
-    echo ${COMPASS_DIR}/ci/work/script/deploy_config.sh
+    echo ${WORK_DIR}/script/deploy_config.sh
 }
 
 function process_input_para()

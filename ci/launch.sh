@@ -1,5 +1,5 @@
 #set -x
-WORK_DIR=$COMPASS_DIR/ci/work
+WORK_DIR=$COMPASS_DIR/ci/work/deploy
 
 mkdir -p $WORK_DIR/script
 

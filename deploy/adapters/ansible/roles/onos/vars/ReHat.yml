@@ -2,5 +2,7 @@
 packages:
   - software-properties-common
   - crudini
+  - oracle-java8-installer
+  - oracle-java8-set-default
 
 services: []

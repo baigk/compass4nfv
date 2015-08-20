@@ -73,6 +73,17 @@
   shell: >
     sed -i '/^featuresBoot=/c\featuresBoot={{ onos_boot_features }}' {{ onos_home }}/{{ karaf_dist }}/etc/org.apache.karaf.features.cfg;
 
+- name: create cluster json
+  template:
+    src: cluster.json
+    dest: "{{ onos_home }}/config/cluster.json"
+
+- name: create tablets json
+  template:
+    src: tablets.json
+    dest: "{{ onos_home }}/config/tablets.json"
+
+
 
 ##########################################################################################################
 ################################    ONOS connect with OpenStack   ################################

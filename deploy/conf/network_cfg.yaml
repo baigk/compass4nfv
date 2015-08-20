@@ -1,0 +1,45 @@
+nic_mappings: []
+bond_mappings: []
+
+sys_intf_mappings:
+  - name: mgmt
+    interface: eth1
+    vlan_tag: 2
+  - name: storage
+    interface: eth1
+    vlan_tag: 3
+  - name: external 
+    interface: br-ex
+
+ip_settings:
+  - name: mgmt
+    ip_ranges: 
+    - - "172.16.1.1"
+      - "172.16.1.254"
+    cidr: "172.16.1.0/24"
+
+  - name: storage
+    ip_ranges: 
+    - - "172.16.2.1"
+      - "172.16.2.254"
+    cidr: "172.16.2.0/24"
+
+  - name: external
+    ip_ranges: 
+    - - "172.16.3.2"
+      - "172.16.3.100"
+    floating_ip_ranges:
+     - "172.16.3.100"
+     - "172.16.3.254"
+
+    cidr: "172.16.3.0/24"
+    gw: "172.16.3.1"
+
+provider_net_mappings:
+  - name: br-ex
+    interface: eth2
+    type: ovs
+
+  - name: br-prv
+    interface: eth3
+    type: ovs

@@ -14,8 +14,9 @@ sudo apt-get update
 sudo apt-get install reprepro -y
 
 #download packages
-#set packages = $getVar('packages', [])
+sudo apt-get -d install openssh-server -y
 
+#set packages = $getVar('packages', [])
 #for pkg in $packages
 sudo apt-get -d install $pkg -y
 #end for

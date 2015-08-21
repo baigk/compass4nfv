@@ -15,7 +15,7 @@
 #    group: root
 #    owner: root
 #    mode: 0755
-   
+ 
 - name: create odl group
   group: name=odl system=yes state=present
 
@@ -143,7 +143,3 @@
 
 - name: Restart neutron-server
   service: name=neutron-server state=started
-
-
-
-

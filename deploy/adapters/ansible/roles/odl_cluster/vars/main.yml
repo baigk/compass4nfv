@@ -12,4 +12,3 @@ odl_features: "{{ odl_base_features + odl_extra_features }}"
 odl_api_port: 8080
 
 packages_noarch: []
-

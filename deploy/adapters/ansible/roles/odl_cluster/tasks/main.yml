@@ -7,5 +7,4 @@
 
 - name: Install ODL Cluster on Compute
   include: main_compute.yml
-  when: inventory_hostname in groups['compute'] 
-   
+  when: inventory_hostname in groups['compute']   

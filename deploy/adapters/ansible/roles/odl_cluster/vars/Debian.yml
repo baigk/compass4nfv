@@ -2,6 +2,7 @@
 
 packages:
   - openjdk-7-jdk
+  - crudini
 
 service_file:
   - src: opendaylight.conf

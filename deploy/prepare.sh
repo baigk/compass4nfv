@@ -1,3 +1,20 @@
+
+function download_iso()
+{
+    iso_name=`basename $ISO_URL`
+    curl --connect-timeout 10 -o $WORK_DIR/cache/"$iso_name.md5" $ISO_URL.md5
+    if [[ -f $WORK_DIR/cache/$iso_name ]]; then
+        local_md5=`md5sum $WORK_DIR/cache/$iso_name | cut -d ' ' -f 1`
+        repo_md5=`cat $WORK_DIR/cache/$iso_name.md5 | cut -d ' ' -f 1`
+        if [[ "$local_md5" == "$repo_md5" ]]; then
+            return
+        fi
+    fi
+
+    curl --connect-timeout 10 -o $WORK_DIR/cache/$iso_name $ISO_URL
+}
+
+
 function prepare_env() {
     export PYTHONPATH=/usr/lib/python2.7/dist-packages:/usr/local/lib/python2.7/dist-packages
     sudo apt-get update -y
@@ -16,13 +33,11 @@ function prepare_env() {
     mkdir -p $WORK_DIR/network
     mkdir -p $WORK_DIR/iso
     mkdir -p $WORK_DIR/venv
+    mkdir -p $WORK_DIR/cache
 
-    if [[ ! -f centos.iso ]];then
-        curl -o $WORK_DIR/iso/centos.iso $ISO_URL
-        if [ ! -f $WORK_DIR/iso/centos.iso ]; then
-            exit 1
-        fi
-    fi
+    download_iso
+
+    cp $WORK_DIR/cache/`basename $ISO_URL` $WORK_DIR/iso/centos.iso -f
 
     # copy compass
     mkdir -p $WORK_DIR/mnt

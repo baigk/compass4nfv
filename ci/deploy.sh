@@ -2,7 +2,13 @@
 COMPASS_DIR=`cd ${BASH_SOURCE[0]%/*}/../;pwd`
 export COMPASS_DIR
 
-apt-get install screen
+for i in python-cheetah screen; do
+    if [[ `dpkg-query -l $i` == 0 ]]; then
+        continue
+    fi
+    apt-get install $i
+done
+
 screen -ls |grep deploy|awk -F. '{print $1}'|xargs kill -9
 screen -wipe
 #screen -dmSL deploy bash $COMPASS_DIR/ci/launch.sh $*

@@ -28,8 +28,15 @@
     system: "yes"
     shell: "/bin/false"
 
+- name: get image http server
+  shell: awk -F'=' '/compass_server/ {print $2}' /etc/compass.conf
+  register: http_server
+
 - name: download odl package
-  get_url: url={{ odl_pkg_url }} dest=/opt/{{ odl_pkg_name }}
+  get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/odl/{{ odl_pkg_url }}"  dest=/opt/{{ odl_pkg_name }}
+
+#- name: download odl package
+#  get_url: url={{ odl_pkg_url }} dest=/opt/{{ odl_pkg_name }}
 
 # TODO: unarchive doesn't support strip-component at the moment
 # TODO: switch to use untar after support is added.
@@ -40,7 +47,10 @@
     - restart odl service
 
 - name: opendaylight system file
-  template: src={{ service_file.src }} dest={{ service_file.dst }} mode=0644
+  template: 
+    src: "{{ service_file.src }}"
+    dest: "{{ service_file.dst }}"
+    mode: 0644
 
 - name: create karaf config
   template:
@@ -84,9 +94,37 @@
   notify:
     - restart odl service
 
-- name: copy Jolokia-OSGi config
+#- name: copy Jolokia-OSGi config
+#  shell: >
+#    cp -r jolokia {{ odl_home }}system/org/;
+
+#- name: copy Jolokia-OSGi config
+#  template:
+#    src: jolokia
+#    dest: "{{ odl_home }}/system/org/"
+#  notify:
+#    - restart odl service
+
+
+- name: mkdir Jolokia-OSGi directory
   shell: >
-    cp -r jolokia {{ odl_home }}/system/org/;
+     mkdir -p {{ odl_home }}system/org/jolokia;
+     mkdir -p {{ odl_home }}system/org/jolokia/jolokia-osgi;
+     mkdir -p {{ odl_home }}system/org/jolokia/jolokia-osgi/1.1.5;
+
+
+- name: copy Jolokia-OSGi config
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+      - src: "jolokia-osgi-1.1.5-features.xml"
+        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5-features.xml"
+      - src: "jolokia-osgi-1.1.5.jar.sha1"
+        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5.jar.sha1"
+#      - src: "jolokia-osgi-1.1.5.jar"
+#        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5.jar"
+
+- name: copy Jolokia-OSGi jar config
+  copy: src=roles/odl_cluster/templates/jolokia-osgi-1.1.5.jar  dest="{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/"
 
 - name: remove KARAF Data Directory
   shell: >
@@ -102,10 +140,10 @@
 - name: Run OpenVSwitch Script
   include: openvswitch.yml
 
-- name: Install Crudini
-  apt: name={{ item }} state=present
-  with_items:
-    - crudini
+#- name: Install Crudini
+#  apt: name={{ item }} state=present
+#  with_items:
+#    - crudini
 
 - name: Configure Neutron1
   shell: >

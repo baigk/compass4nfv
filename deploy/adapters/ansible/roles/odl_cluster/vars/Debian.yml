@@ -5,5 +5,5 @@ packages:
   - crudini
 
 service_file:
-  - src: opendaylight.conf
-    dst: /etc/init/opendaylight.conf
+   src: opendaylight.conf
+   dst: /etc/init/opendaylight.conf

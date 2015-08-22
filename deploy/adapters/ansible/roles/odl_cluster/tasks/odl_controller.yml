@@ -106,25 +106,25 @@
 #    - restart odl service
 
 
-- name: mkdir Jolokia-OSGi directory
-  shell: >
-     mkdir -p {{ odl_home }}system/org/jolokia;
-     mkdir -p {{ odl_home }}system/org/jolokia/jolokia-osgi;
-     mkdir -p {{ odl_home }}system/org/jolokia/jolokia-osgi/1.1.5;
+#- name: mkdir Jolokia-OSGi directory
+#  shell: >
+#     mkdir -p {{ odl_home }}system/org/jolokia;
+#     mkdir -p {{ odl_home }}system/org/jolokia/jolokia-osgi;
+#     mkdir -p {{ odl_home }}system/org/jolokia/jolokia-osgi/1.1.5;
 
 
-- name: copy Jolokia-OSGi config
-  template: src={{ item.src }} dest={{ item.dest }}
-  with_items:
-      - src: "jolokia-osgi-1.1.5-features.xml"
-        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5-features.xml"
-      - src: "jolokia-osgi-1.1.5.jar.sha1"
-        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5.jar.sha1"
+#- name: copy Jolokia-OSGi config
+#  template: src={{ item.src }} dest={{ item.dest }}
+#  with_items:
+#      - src: "jolokia-osgi-1.1.5-features.xml"
+#        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5-features.xml"
+#      - src: "jolokia-osgi-1.1.5.jar.sha1"
+#        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5.jar.sha1"
 #      - src: "jolokia-osgi-1.1.5.jar"
 #        dest: "{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/jolokia-osgi-1.1.5.jar"
 
-- name: copy Jolokia-OSGi jar config
-  copy: src=roles/odl_cluster/templates/jolokia-osgi-1.1.5.jar  dest="{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/"
+#- name: copy Jolokia-OSGi jar config
+#  copy: src=roles/odl_cluster/templates/jolokia-osgi-1.1.5.jar  dest="{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/"
 
 - name: remove KARAF Data Directory
   shell: >

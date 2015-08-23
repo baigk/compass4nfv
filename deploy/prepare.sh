@@ -2,6 +2,7 @@
 function download_iso()
 {
     iso_name=`basename $ISO_URL`
+    rm -f $WORK_DIR/cache/"$iso_name.md5"
     curl --connect-timeout 10 -o $WORK_DIR/cache/"$iso_name.md5" $ISO_URL.md5
     if [[ -f $WORK_DIR/cache/$iso_name ]]; then
         local_md5=`md5sum $WORK_DIR/cache/$iso_name | cut -d ' ' -f 1`

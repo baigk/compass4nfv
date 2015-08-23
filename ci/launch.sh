@@ -7,7 +7,6 @@ source ${COMPASS_DIR}/ci/log.sh
 source ${COMPASS_DIR}/ci/deploy_parameter.sh
 source $(process_default_para $*) || exit 1
 source $(process_input_para $*) || exit 1
-source ${COMPASS_DIR}/deploy/conf/${TYPE}_${FLAVOR}.conf
 source ${COMPASS_DIR}/deploy/conf/${FLAVOR}.conf
 source ${COMPASS_DIR}/deploy/conf/${TYPE}.conf
 source ${COMPASS_DIR}/deploy/conf/base.conf

@@ -29,6 +29,7 @@ function download_git()
 
 function download_url()
 {
+    rm -f $WORK_DIR/cache/$1.md5
     curl --connect-timeout 10 -o $WORK_DIR/cache/$1.md5 $2.md5
     if [[ -f $WORK_DIR/cache/$1 ]]; then 
         local_md5=`md5sum $WORK_DIR/cache/$1 | cut -d ' ' -f 1`
@@ -112,7 +113,8 @@ function make_iso()
     copy_file $new
 
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
-    
+
+    md5sum compass.iso > compass.iso.md5    
     # delete tmp file
     sudo rm -rf new base centos_base.iso
 }

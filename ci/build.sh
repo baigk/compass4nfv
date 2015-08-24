@@ -112,6 +112,13 @@ function make_iso()
 
     copy_file $new
 
+    set +e
+    sudo mkisofs -version
+    if [[ $? -ne 0 ]]; then
+        sudo apt-get install genisoimage
+    fi
+    set -e
+
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
 
     md5sum compass.iso > compass.iso.md5    

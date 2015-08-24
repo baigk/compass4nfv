@@ -130,6 +130,11 @@
   shell: >
     rm -rf {{ odl_home }}/data/*;
 
+- name: chown OpenDaylight Directory and Files
+  shell: >
+    chown -R odl:odl "{{ odl_home }}";
+    chown odl:odl "{{ service_file.dst }}";
+
 
 ##########################################################################################################
 ################################    OpenDayLight connect with OpenStack   ################################

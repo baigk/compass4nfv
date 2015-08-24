@@ -126,9 +126,9 @@
 #- name: copy Jolokia-OSGi jar config
 #  copy: src=roles/odl_cluster/templates/jolokia-osgi-1.1.5.jar  dest="{{ odl_home }}/system/org/jolokia/jolokia-osgi/1.1.5/"
 
-#- name: remove KARAF Data Directory
-#  shell: >
-#    rm -rf {{ odl_home }}/data/*;
+- name: remove KARAF Data Directory
+  shell: >
+    rm -rf {{ odl_home }}/data/*;
 
 
 ##########################################################################################################

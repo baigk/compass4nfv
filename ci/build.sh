@@ -11,8 +11,18 @@ mkdir -p $WORK_DIR $WORK_DIR/cache
 
 cd $WORK_DIR
 
+function prepare_env()
+{
+    set +e
+    sudo mkisofs -version
+    if [[ $? -ne 0 ]]; then
+        sudo apt-get install genisoimage
+    fi
+    set -e
+}
+
 function download_git()
-{    
+{
      if [[ -d $WORK_DIR/cache/${1%.*} ]]; then
          cd $WORK_DIR/cache/${1%.*}
          if [[  -d ./.git ]]; then
@@ -22,7 +32,7 @@ function download_git()
          cd -
 
          return
-     fi 
+     fi
 
      git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
 }
@@ -31,14 +41,14 @@ function download_url()
 {
     rm -f $WORK_DIR/cache/$1.md5
     curl --connect-timeout 10 -o $WORK_DIR/cache/$1.md5 $2.md5
-    if [[ -f $WORK_DIR/cache/$1 ]]; then 
+    if [[ -f $WORK_DIR/cache/$1 ]]; then
         local_md5=`md5sum $WORK_DIR/cache/$1 | cut -d ' ' -f 1`
         repo_md5=`cat $WORK_DIR/cache/$1.md5 | cut -d ' ' -f 1`
         if [[ "$local_md5" == "$repo_md5" ]]; then
             return
         fi
     fi
-    
+
     curl --connect-timeout 10 -o $WORK_DIR/cache/$1 $2
 }
 
@@ -56,15 +66,12 @@ function download_packages()
              download_git $name $i
          elif [[ ${i%%:*} == "http" ]]; then
              download_url $name $i
-         else 
+         else
              download_local $name $i
          fi
 
-         if [[ $? -ne 0 ]]; then
-             exit 1
-         fi
      done
-     
+
      git fetch
      git checkout origin/master -- $COMPASS_DIR/deploy/adapters
 }
@@ -108,22 +115,16 @@ function make_iso()
     sudo mount -o loop centos_base.iso base
     cd base;find .|cpio -pd ../new;cd -
     sudo umount base
-    chmod 755 ./new -R 
+    chmod 755 ./new -R
 
     copy_file $new
 
-    set +e
-    sudo mkisofs -version
-    if [[ $? -ne 0 ]]; then
-        sudo apt-get install genisoimage
-    fi
-    set -e
-
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
 
-    md5sum compass.iso > compass.iso.md5    
+    md5sum compass.iso > compass.iso.md5
     # delete tmp file
     sudo rm -rf new base centos_base.iso
 }
 
+prepare_env
 make_iso

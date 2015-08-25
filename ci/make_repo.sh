@@ -37,10 +37,10 @@ if [[ -e ${WORK_PATH}/install_packeages.sh ]]; then
     rm -f ${WORK_PATH}/install_packages.sh
 fi
 
-# generate ubuntu 14.04 ppa
 sudo apt-get install python-yaml -y
 sudo apt-get install python-cheetah -y
 
+# generate ubuntu 14.04 juno ppa
 python gen_ins_pkg_script.py ${DEPLOY_SCRIPT_PATH} Debian Debian_juno.tmpl
 
 sudo docker build -t ${DOCKER_TAG} -f ${DOCKER_FILE} .
@@ -55,9 +55,29 @@ if [[ -e ${WORK_PATH}/install_packages.sh ]]; then
     rm -f ${WORK_PATH}/install_packages.sh
 fi
 
-# generate centos 7.1 ppa
+# generate ubuntu 14.04 kilo ppa
+python gen_ins_pkg_script.py ${DEPLOY_SCRIPT_PATH} Debian Debian_kilo.tmpl
+
+OPENSTACK_TAG="kilo"
+DOCKER_TAG="${UBUNTU_TAG}/openstack-${OPENSTACK_TAG}"
+DOCKER_FILE=${WORK_PATH}/${UBUNTU_TAG}/${OPENSTACK_TAG}/Dockerfile
+
+sudo docker build -t ${DOCKER_TAG} -f ${DOCKER_FILE} .
+
+mkdir -p ${REPO_PATH}
+sudo docker run -t -v ${REPO_PATH}:/result ${DOCKER_TAG}
+
+IMAGE_ID=$(sudo docker images|grep ${DOCKER_TAG}|awk '{print $3}')
+sudo docker rmi -f ${IMAGE_ID}
+
+if [[ -e ${WORK_PATH}/install_packages.sh ]]; then
+    rm -f ${WORK_PATH}/install_packages.sh
+fi
+
+# generate centos 7.1 juno ppa
 python gen_ins_pkg_script.py ${DEPLOY_SCRIPT_PATH} RedHat RedHat_juno.tmpl
 
+OPENSTACK_TAG="juno"
 DOCKER_TAG="${CENTOS_TAG}/openstack-${OPENSTACK_TAG}"
 DOCKER_FILE=${WORK_PATH}/${CENTOS_TAG}/${OPENSTACK_TAG}/Dockerfile
 

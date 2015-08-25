@@ -3,8 +3,8 @@
 
 - name: Install ODL Cluster on Controller
   include: odl_controller.yml
-  when: inventory_hostname in groups['controller']
+  when: inventory_hostname in groups['odl']
 
 - name: Install ODL Cluster on Compute
   include: openvswitch.yml
-  when: inventory_hostname in groups['compute']   
+  when: inventory_hostname not in groups['odl']   

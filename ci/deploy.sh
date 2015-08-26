@@ -2,11 +2,11 @@
 COMPASS_DIR=`cd ${BASH_SOURCE[0]%/*}/../;pwd`
 export COMPASS_DIR
 
-for i in python-cheetah screen; do
+for i in python-cheetah python-yaml screen; do
     if [[ `dpkg-query -l $i` == 0 ]]; then
         continue
     fi
-    apt-get install $i
+    sudo apt-get install $i
 done
 
 screen -ls |grep deploy|awk -F. '{print $1}'|xargs kill -9

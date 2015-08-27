@@ -7,4 +7,4 @@
 
 - name: Install ODL Cluster on Compute
   include: openvswitch.yml
-  when: groups['odl'] is not defined and inventory_hostname not in groups['odl']
+  when: groups['odl']|length !=0 and inventory_hostname not in groups['odl']

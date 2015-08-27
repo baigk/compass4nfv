@@ -122,9 +122,50 @@ function make_iso()
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
 
     md5sum compass.iso > compass.iso.md5
+
     # delete tmp file
     sudo rm -rf new base centos_base.iso
 }
 
+function copy_iso()
+{
+   if [[ $# -eq 0 ]]; then
+       return
+   fi
+
+   TEMP=`getopt -o d:f: --long iso-dir:,iso-name: -n 'build.sh' -- "$@"`
+
+   if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+   eval set -- "$TEMP"
+
+   dir=""
+   file=""
+
+   while :; do
+       case "$1" in
+           -d|--iso-dir) dir=$2; shift 2;;
+           -f|--iso-name) file=$2; shift 2;;
+           --) shift; break;;
+           *) echo "Internal error!" ; exit 1 ;;
+       esac
+   done
+
+   if [[ $dir == "" ]]; then
+       dir=$WORK_DIR
+   fi
+
+   if [[ $file == "" ]]; then
+       file="compass.iso"
+   fi
+
+   if [[ "$dir/$file" == "$WORK_DIR/compass.iso" ]]; then
+      return
+   fi
+
+   cp $WORK_DIR/compass.iso $dir/$file -f
+}
+
 prepare_env
 make_iso
+copy_iso $*

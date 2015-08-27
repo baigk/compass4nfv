@@ -36,11 +36,11 @@
     - neutron-compute
     - cinder-volume
 
-- hosts: all
-  remote_user: root
-  sudo: True
-  roles:
-    - odl_cluster
+#- hosts: all
+#  remote_user: root
+#  sudo: True
+#  roles:
+#    - odl_cluster
 
 - hosts: all
   remote_user: root

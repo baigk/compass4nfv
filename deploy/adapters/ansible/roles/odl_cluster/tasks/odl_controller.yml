@@ -150,16 +150,16 @@
   with_items:
     - crudini
 
-- name: Configure Neutron1
-  shell: >
-    crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers opendaylight;
-    crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan;
+#- name: Configure Neutron1
+#  shell: >
+#    crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers opendaylight;
+#    crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan;
 
-- name: Create ML2 Configuration File
-  template:
-    src: ml2_conf.sh
-    dest: "/opt/ml2_conf.sh"
-    mode: 0777
+#- name: Create ML2 Configuration File
+#  template:
+#    src: ml2_conf.sh
+#    dest: "/opt/ml2_conf.sh"
+#    mode: 0777
 
 - name: Configure Neutron2
   command: su -s /bin/sh -c "/opt/ml2_conf.sh;"

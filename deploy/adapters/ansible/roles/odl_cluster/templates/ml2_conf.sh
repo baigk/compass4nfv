@@ -4,6 +4,3 @@ password = admin
 username = admin
 url = http://{{ HA_VIP }}:8080/controller/nb/v2/neutron
 EOT
-
-#url = http://{{ hostvars[inventory_hostname]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}:8080/controller/nb/v2/neutron
-

@@ -142,13 +142,13 @@
 - name: Turn off neutron-server on control node
   service: name=neutron-server state=stopped
 
-- name: Run OpenVSwitch Script
-  include: openvswitch.yml
-
 - name: Install Crudini
   apt: name={{ item }} state=present
   with_items:
     - crudini
+
+- name: Run OpenVSwitch Script
+  include: openvswitch.yml
 
 #- name: Configure Neutron1
 #  shell: >

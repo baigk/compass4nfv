@@ -1,11 +1,34 @@
 ---
+- name: upload onos driver package
+  unarchive: src=networking-onos.tar dest=/opt/
+
+- name: install onos driver
+  command: su -s /bin/sh -c "/opt/networking-onos/install_driver.sh"
+
 - name: install onos required packages
   action: "{{ ansible_pkg_mgr }}  name={{ item }} state=present"
   with_items: packages
-
+  
 - name: get image http server
   shell: awk -F'=' '/compass_server/ {print $2}' /etc/compass.conf
   register: http_server
+
+- name: download oracle-jdk8 package file
+  get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/onos/{{ jdk8_pkg_name }}"  dest=/opt/{{ jdk8_pkg_name }}
+  
+- name: upload install_jdk8 scripts
+  unarchive: src=install_jdk8.tar dest=/opt/
+  
+- name: install install_jdk8 package
+  command: su -s /bin/sh -c "/opt/install_jdk8/install_jdk8.sh" 
+  
+- name: create JAVA_HOME environment variable
+  shell: >
+    export J2SDKDIR=/usr/lib/jvm/java-8-oracle;
+    export J2REDIR=/usr/lib/jvm/java-8-oracle/jre;
+    export PATH=$PATH:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin;
+    export JAVA_HOME=/usr/lib/jvm/java-8-oracle;
+    export DERBY_HOME=/usr/lib/jvm/java-8-oracle/db;
 
 - name: create onos group
   group: name=onos system=yes state=present
@@ -34,27 +57,6 @@
 - name: extract onos package
   command: su -s /bin/sh -c "tar xzf /opt/{{ onos_pkg_name }} -C {{ onos_home }} --strip-components 1 --no-overwrite-dir -k --skip-old-files" onos
 
-- name: configure onos boot feature
-  shell: >
-    sed -i '/^featuresBoot=/c\featuresBoot={{ onos_boot_features }}' {{ onos_home }}/{{ karaf_dist }}/etc/org.apache.karaf.features.cfg;
-
-- name: download oracle-jdk8 package file
-  get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/onos/{{ jdk8_pkg_name }}"  dest=/opt/{{ jdk8_pkg_name }}
-
-- name: upload install_jdk8 scripts
-  unarchive: src=install_jdk8.tar dest=/opt/
-
-- name: install install_jdk8 package
-  command: su -s /bin/sh -c "/opt/install_jdk8/install_jdk8.sh" 
-
-- name: create JAVA_HOME environment variable
-  shell: >
-    export J2SDKDIR=/usr/lib/jvm/java-8-oracle;
-    export J2REDIR=/usr/lib/jvm/java-8-oracle/jre;
-    export PATH=$PATH:/usr/lib/jvm/java-8-oracle/bin:/usr/lib/jvm/java-8-oracle/db/bin:/usr/lib/jvm/java-8-oracle/jre/bin;
-    export JAVA_HOME=/usr/lib/jvm/java-8-oracle;
-    export DERBY_HOME=/usr/lib/jvm/java-8-oracle/db;
-
 - name: configure onos service
   shell: >
     echo 'export ONOS_OPTS=debug' > {{ onos_home }}/options;
@@ -63,24 +65,26 @@
     mkdir {{ onos_home }}/config;
     sed -i '/pre-stop/i\env JAVA_HOME=/usr/lib/jvm/java-8-oracle' {{ onos_home }}/debian/onos.conf;
     cp -rf {{ onos_home }}/debian/onos.conf /etc/init/;
+  notify:
+    - restart onos service
+  
+- name: configure onos boot feature
+  shell: >
+    sed -i '/^featuresBoot=/c\featuresBoot={{ onos_boot_features }}' {{ onos_home }}/{{ karaf_dist }}/etc/org.apache.karaf.features.cfg;
 
 - name: create cluster json
   template:
     src: cluster.json
     dest: "{{ onos_home }}/config/cluster.json"
+  notify:
+    - restart onos service
 
 - name: create tablets json
   template:
     src: tablets.json
-    dest: "{{ onos_home }}/config/tablets.json"	
+    dest: "{{ onos_home }}/config/tablets.json"
   notify:
     - restart onos service
-
-- name: upload onos driver package
-  unarchive: src=networking-onos.tar dest=/opt/
-
-- name: install onos driver
-  command: su -s /bin/sh -c "/opt/networking-onos/install_driver.sh"
 
 - name: wait for onos start
   shell: "sleep 100" 

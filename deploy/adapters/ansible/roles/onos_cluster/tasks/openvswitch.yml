@@ -8,7 +8,7 @@
     rm -rf /var/log/openvswitch/* ;
     rm -rf /etc/openvswitch/conf.db ;
     service openvswitch-switch start ;
-	
+
 - name: Set ONOS as the manager
   command: su -s /bin/sh -c "ovs-vsctl set-manager tcp:{{ HA_VIP }}:6640;"
 

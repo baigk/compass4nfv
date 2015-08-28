@@ -82,7 +82,8 @@
 - name: install onos driver
   command: su -s /bin/sh -c "/opt/networking-onos/install_driver.sh"
 	
-
+- name: wait for onos start
+  shell: "sleep 100" 
 
 
 ##########################################################################################################

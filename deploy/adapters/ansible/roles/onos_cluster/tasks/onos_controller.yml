@@ -65,6 +65,9 @@
     mkdir {{ onos_home }}/config;
     sed -i '/pre-stop/i\env JAVA_HOME=/usr/lib/jvm/java-8-oracle' {{ onos_home }}/debian/onos.conf;
     cp -rf {{ onos_home }}/debian/onos.conf /etc/init/;
+  notify:
+    - restart onos service
+  
 - name: configure onos boot feature
   shell: >
     sed -i '/^featuresBoot=/c\featuresBoot={{ onos_boot_features }}' {{ onos_home }}/{{ karaf_dist }}/etc/org.apache.karaf.features.cfg;
@@ -73,6 +76,8 @@
   template:
     src: cluster.json
     dest: "{{ onos_home }}/config/cluster.json"
+  notify:
+    - restart onos service
 
 - name: create tablets json
   template:
@@ -81,6 +86,8 @@
   notify:
     - restart onos service
 
+- name: wait for onos start
+  shell: "sleep 100" 
 
 
 ##########################################################################################################

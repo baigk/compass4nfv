@@ -1,3 +1,8 @@
+used_nics: 
+  - eth1
+  - eth2
+  - eth3
+
 nic_mappings: []
 bond_mappings: []
 

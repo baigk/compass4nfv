@@ -17,6 +17,8 @@ source ${COMPASS_DIR}/deploy/compass_vm.sh
 source ${COMPASS_DIR}/deploy/deploy_host.sh
 
 ######################### main process
+if false
+then
 if ! prepare_env;then
     echo "prepare_env failed"
     exit 1
@@ -41,6 +43,9 @@ fi
 if ! launch_compass;then
     log_error "launch_compass failed"
     exit 1
+fi
+else
+export machines="'00:00:01:c9:03:34','00:00:7c:8e:1e:c6','00:00:00:ec:6f:ca','00:00:7c:7a:91:cb','00:00:0e:82:79:08'"
 fi
 if [[ ! -z $VIRT_NUMBER ]];then
     if ! launch_host_vms;then

@@ -25,6 +25,8 @@ function prepare_env() {
     sudo pip install --upgrade pip
     sudo pip install --upgrade ansible
     sudo pip install --upgrade virtualenv
+    sudo pip install --upgrade netaddr
+    sudo pip install --upgrade oslo.config
     sudo service libvirt-bin restart
    
     # prepare work dir

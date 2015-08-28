@@ -48,3 +48,9 @@
   roles:
 #    - ceph-deploy
     - monitor
+
+- hosts: all
+  remote_user: root
+  sudo: True
+  roles:
+    - onos_cluster

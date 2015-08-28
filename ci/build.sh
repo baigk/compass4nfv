@@ -24,14 +24,19 @@ function prepare_env()
 function download_git()
 {
      if [[ -d $WORK_DIR/cache/${1%.*} ]]; then
-         cd $WORK_DIR/cache/${1%.*}
-         if [[  -d ./.git ]]; then
+        if [[  -d $WORK_DIR/cache/${1%.*}/.git ]]; then
+
+             cd $WORK_DIR/cache/${1%.*}
+
              git fetch origin master
              git checkout origin/master
-         fi
-         cd -
 
-         return
+             cd -
+
+             return
+         fi
+
+         rm -rf $WORK_DIR/cache/${1%.*}
      fi
 
      git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
@@ -83,8 +88,6 @@ function copy_file()
     # main process
     mkdir -p new/repos new/compass new/bootstrap new/pip new/guestimg new/app_packages
 
-    find . -name ".git" |xargs rm -rf
-
     cp -rf $SCRIPT_DIR/ks.cfg new/isolinux/ks.cfg
 
     rm -rf new/.rr_moved
@@ -103,6 +106,8 @@ function copy_file()
     done
 
     cp $COMPASS_DIR/deploy/adapters new/compass/compass-adapters -rf
+
+    find new/compass -name ".git" |xargs rm -rf
 }
 
 function make_iso()
@@ -122,9 +127,50 @@ function make_iso()
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
 
     md5sum compass.iso > compass.iso.md5
+
     # delete tmp file
     sudo rm -rf new base centos_base.iso
 }
 
+function copy_iso()
+{
+   if [[ $# -eq 0 ]]; then
+       return
+   fi
+
+   TEMP=`getopt -o d:f: --long iso-dir:,iso-name: -n 'build.sh' -- "$@"`
+
+   if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+   eval set -- "$TEMP"
+
+   dir=""
+   file=""
+
+   while :; do
+       case "$1" in
+           -d|--iso-dir) dir=$2; shift 2;;
+           -f|--iso-name) file=$2; shift 2;;
+           --) shift; break;;
+           *) echo "Internal error!" ; exit 1 ;;
+       esac
+   done
+
+   if [[ $dir == "" ]]; then
+       dir=$WORK_DIR
+   fi
+
+   if [[ $file == "" ]]; then
+       file="compass.iso"
+   fi
+
+   if [[ "$dir/$file" == "$WORK_DIR/compass.iso" ]]; then
+      return
+   fi
+
+   cp $WORK_DIR/compass.iso $dir/$file -f
+}
+
 prepare_env
 make_iso
+copy_iso $*

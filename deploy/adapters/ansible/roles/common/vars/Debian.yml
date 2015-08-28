@@ -5,4 +5,6 @@ packages:
   - openvswitch-datapath-dkms
   - openvswitch-switch
 
+services: []
+
 ntp_service: ntp

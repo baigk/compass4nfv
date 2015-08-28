@@ -24,14 +24,19 @@ function prepare_env()
 function download_git()
 {
      if [[ -d $WORK_DIR/cache/${1%.*} ]]; then
-         cd $WORK_DIR/cache/${1%.*}
-         if [[  -d ./.git ]]; then
+        if [[  -d $WORK_DIR/cache/${1%.*}/.git ]]; then
+
+             cd $WORK_DIR/cache/${1%.*}
+
              git fetch origin master
              git checkout origin/master
-         fi
-         cd -
 
-         return
+             cd -
+
+             return
+         fi
+
+         rm -rf $WORK_DIR/cache/${1%.*}
      fi
 
      git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
@@ -83,8 +88,6 @@ function copy_file()
     # main process
     mkdir -p new/repos new/compass new/bootstrap new/pip new/guestimg new/app_packages
 
-    find . -name ".git" |xargs rm -rf
-
     cp -rf $SCRIPT_DIR/ks.cfg new/isolinux/ks.cfg
 
     rm -rf new/.rr_moved
@@ -103,6 +106,8 @@ function copy_file()
     done
 
     cp $COMPASS_DIR/deploy/adapters new/compass/compass-adapters -rf
+
+    find new/compass -name ".git" |xargs rm -rf
 }
 
 function make_iso()

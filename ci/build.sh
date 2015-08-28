@@ -77,8 +77,8 @@ function download_packages()
 
      done
 
-     git fetch
-     git checkout origin/master -- $COMPASS_DIR/deploy/adapters
+     #git fetch
+     #git checkout origin/master -- $COMPASS_DIR/deploy/adapters
 }
 
 function copy_file()

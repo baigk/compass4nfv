@@ -1,6 +1,6 @@
 { "ipPrefix": "10.1.0.*",
   "nodes":[
-{% for host in groups['controller'] %}
+{% for host in groups['onos'] %}
     {% if loop.last %}
 	        { "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}", "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}", "tcpPort": 9876 }
     {% else %}

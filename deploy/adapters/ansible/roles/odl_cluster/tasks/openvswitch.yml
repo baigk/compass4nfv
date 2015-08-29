@@ -5,8 +5,12 @@
   with_items:
     - crudini
 
-- name: shut down and disable Neutron's agent services
+- name: shut down and disable Neutron's openvswitch  agent services
   service: name=neutron-plugin-openvswitch-agent state=stopped
+
+- name: remove Neutron's openvswitch agent services
+  shell: >
+    update-rc.d neutron-plugin-openvswitch-agent remove
 
 #- name: Stop the Open vSwitch service and clear existing OVSDB
 #  shell: >
@@ -31,3 +35,6 @@
     src: ml2_conf.sh
     dest: "/opt/ml2_conf.sh"
     mode: 0777
+
+- name: Execute ML2 Configuration File
+  command: su -s /bin/sh -c "/opt/ml2_conf.sh;"

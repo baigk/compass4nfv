@@ -26,7 +26,8 @@
 
 - name: update ovs
   shell: >
-    cd /opt/openvswitch;
+    cd /opt/openvswitch;	
+    dpkg -i openvswitch-common_2.3.0-1_amd64.deb;
     dpkg -i openvswitch-switch_2.3.0-1_amd64.deb;
 
 - name: Set ONOS as the manager

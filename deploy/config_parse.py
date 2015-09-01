@@ -45,7 +45,7 @@ def export_config_file(s, ofile):
     env.update({'HOSTNAMES': hostnames(s, ',')})
     env.update({'HOST_ROLES': hostroles(s, ';')})
 
-    value = hostmacs(s, ' ')
+    value = hostmacs(s, ',')
     if len(value) > 0:
         env.update({'HOST_MACS': value})
 
@@ -58,7 +58,7 @@ def export_reset_file(s, tmpl_dir, output_dir, output_file):
     if not tmpl_file_name:
         return
 
-    tmpl = Template(file=os.path.join(tmpl_dir, tmpl_file_name + '.tml'), searchList=s)
+    tmpl = Template(file=os.path.join(tmpl_dir,'power', tmpl_file_name + '.tmpl'), searchList=s)
 
     reset_file_name = os.path.join(output_dir, tmpl_file_name + '.sh')
     with open(reset_file_name, 'w') as f:

@@ -78,7 +78,17 @@ function make_repo()
     python gen_ins_pkg_script.py ${ansible_dir} ${arch} ${tmpl} \
                ${docker_tmpl} "${default_package}" "${special_package}" "${special_package_dir}"
 
-    sudo docker build -t ${docker_tag} -f ${WORK_PATH}/work/repo/${dockerfile} .
+    if [[ -d ${WORK_PATH}/$arch ]]; then
+        rm -rf ${WORK_PATH}/work/repo/$arch
+        cp -rf ${WORK_PATH}/$arch ${WORK_PATH}/work/repo/
+    fi
+
+    if [[ -d ${WORK_PATH}/$os_tag ]]; then
+        rm -rf ${WORK_PATH}/work/repo/$os_tag
+        cp -rf ${WORK_PATH}/$os_tag ${WORK_PATH}/work/repo/centos7
+    fi
+
+    sudo docker build -t ${docker_tag} -f ${WORK_PATH}/work/repo/${dockerfile} ${WORK_PATH}/work/repo/
 
     sudo docker run -t -v ${WORK_PATH}/work/repo:/result ${docker_tag}
 
@@ -94,18 +104,19 @@ function make_all_repo()
               --tmpl Debian_juno.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
-    if false; then
+
     make_repo --os-tag trusty --openstack-tag kilo \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl Debian_kilo.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
-    fi
+
     make_repo --os-tag centos7 --openstack-tag juno \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl RedHat_juno.tmpl \
               --default-package "strace net-tools wget vim openssh-server dracut-config-rescue dracut-network" \
               --special-package ""
+
 }
 
 process_env

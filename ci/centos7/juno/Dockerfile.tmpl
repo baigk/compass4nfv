@@ -18,11 +18,11 @@ RUN chmod +x /tmp/chigang/$script
 RUN /tmp/chigang/$script
 #end for
 ADD ./centos7/juno/centos7-comps.xml /
-ADD ./work/repo/install_packages.sh /tmp/chigang/install_packages.sh
+ADD ./install_packages.sh /tmp/chigang/install_packages.sh
 RUN chmod +x /tmp/chigang/install_packages.sh
 RUN /tmp/chigang/install_packages.sh
 
-ADD ./work/repo/cp_repo.sh /tmp/chigang/cp_repo.sh
+ADD ./cp_repo.sh /tmp/chigang/cp_repo.sh
 RUN chmod +x /tmp/chigang/cp_repo.sh
 RUN mkdir /result
 

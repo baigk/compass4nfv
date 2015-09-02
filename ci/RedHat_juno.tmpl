@@ -4,7 +4,7 @@ set -x
 # add 163 repo
 yum install wget -y
 wget -O /etc/yum.repos.d/CentOS7-Base-163.repo  http://mirrors.163.com/.help/CentOS7-Base-163.repo
-yum remove wget -y
+yum remove wget iptables-services -y
 rm -f /etc/yum.repos.d/CentOS-*.repo
 yum repolist
 yum cleanall

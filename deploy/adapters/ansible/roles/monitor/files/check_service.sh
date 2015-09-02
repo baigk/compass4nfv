@@ -1,7 +1,8 @@
 #!/bin/bash
 services=`cat /opt/service | uniq`
 for service in $services; do
-    if [ `/sbin/initctl list|awk '/stop\/waiting/{print $1}'|uniq | grep $service` ]; then
-        /sbin/start $service
+    /usr/sbin/service $service status >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        /usr/sbin/service $service start
     fi
 done

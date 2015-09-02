@@ -1,16 +1,20 @@
 ---
 
-- name: Install Crudini
-  apt: name={{ item }} state=present
-  with_items:
-    - crudini
+#- name: Install Crudini
+#  apt: name={{ item }} state=present
+#  with_items:
+#    - crudini
+
+- name: install compute  packages
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items: compute_packages | union(compute_packages_noarch)
 
 - name: shut down and disable Neutron's openvswitch  agent services
   service: name=neutron-plugin-openvswitch-agent state=stopped
 
-- name: remove Neutron's openvswitch agent services
-  shell: >
-    update-rc.d neutron-plugin-openvswitch-agent remove
+#- name: remove Neutron's openvswitch agent services
+#  shell: >
+#    update-rc.d neutron-plugin-openvswitch-agent remove
 
 #- name: Stop the Open vSwitch service and clear existing OVSDB
 #  shell: >

@@ -1,7 +1,7 @@
 ---
-- name: install java packages
+- name: install controller  packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
-  with_items: packages | union(packages_noarch)
+  with_items: controller_packages | union(controller_packages_noarch)
 
 #- name: install opendaylight packages
 #  apt: name={{ item }} state=present
@@ -142,10 +142,10 @@
 - name: Turn off neutron-server on control node
   service: name=neutron-server state=stopped
 
-- name: Install Crudini
-  apt: name={{ item }} state=present
-  with_items:
-    - crudini
+#- name: Install Crudini
+#  apt: name={{ item }} state=present
+#  with_items:
+#    - crudini
 
 - name: Run OpenVSwitch Script
   include: openvswitch.yml

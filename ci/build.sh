@@ -65,7 +65,7 @@ function download_local()
 function download_packages()
 {
      for i in $CENTOS_BASE $COMPASS_CORE $COMPASS_WEB $COMPASS_INSTALL $TRUSTY_JUNO_PPA \
-              $UBUNTU_ISO $CENTOS_ISO $CENTOS_PPA $LOADERS $CIRROS $PEXCEPT $APP_PACKAGE; do
+              $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $PEXCEPT $APP_PACKAGE; do
          name=`basename $i`
          if [[ ${name##*.} == "git" ]]; then
              download_git $name $i
@@ -92,7 +92,7 @@ function copy_file()
 
     rm -rf new/.rr_moved
 
-    for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS_PPA; do
+    for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA; do
         cp $WORK_DIR/cache/`basename $i` new/repos/ -rf
     done
 

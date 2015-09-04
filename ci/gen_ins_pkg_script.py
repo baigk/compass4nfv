@@ -14,7 +14,7 @@ def get_file_list(root, arch):
 
     return files
 
-def get_packages_name_list(file_list):
+def get_packages_name_list(file_list, special_packages):
     package_name_list = []
 
     for file in file_list:
@@ -26,20 +26,39 @@ def get_packages_name_list(file_list):
             if not value:
                 continue
 
+            if value in special_packages:
+                continue
+
             if value not in package_name_list:
                 package_name_list += value
 
     return package_name_list
 
-def generate_download_script(root, arch, tmpl):
-    package_name_list = get_packages_name_list(get_file_list(root, arch))
+def generate_download_script(root, arch, tmpl, docker_tmpl, default_packages, special_packages, special_packages_dir):
+    package_name_list = get_packages_name_list(get_file_list(root, arch), special_packages)
 
-    tmpl = Template(file=tmpl, searchList={'packages':package_name_list})
+    tmpl = Template(file=tmpl, searchList={'packages':package_name_list, 'default_packages':default_packages})
+    with open('work/repo/install_packages.sh', 'w') as f:
+        f.write(tmpl.respond())
 
-    with open('install_packages.sh', 'w') as f:
+    make_script = []
+    for i in special_packages:
+        name = 'make_' + i + '.sh'
+        if os.path.exists(os.path.join('.', arch, name)):
+            make_script.append(name)
+
+    searchList = {'dir':os.path.join('.', arch), 'scripts':make_script}
+    if os.path.exists(special_packages_dir):
+        special_packages_names = [i for i in os.listdir(special_packages_dir) if os.path.isfile(i)]
+        searchList.update({'spcial_packages':special_packages_names})
+
+    Dockerfile=os.path.basename(docker_tmpl).split('.')[0]
+    tmpl = Template(file=docker_tmpl, searchList=searchList)
+    with open(os.path.join('work/repo', Dockerfile), 'w') as f:
         f.write(tmpl.respond())
 
 if __name__=='__main__':
     # generate_download_script('ansible', 'Debian', 'Debian.tmpl')
-    generate_download_script(sys.argv[1], sys.argv[2], sys.argv[3])
+    generate_download_script(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4],
+                             sys.argv[5].split(' '), sys.argv[6].split(' '), sys.argv[7])
 

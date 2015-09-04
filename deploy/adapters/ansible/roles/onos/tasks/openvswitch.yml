@@ -1,0 +1,19 @@
+---
+- name: remove neutron-plugin-openvswitch-agent auto start
+  shell: >
+    update-rc.d neutron-plugin-openvswitch-agent remove;
+    sed -i /neutron-plugin-openvswitch-agent/d /opt/service
+
+- name: shut down and disable Neutron's agent services
+  service: name=neutron-plugin-openvswitch-agent state=stopped
+
+- name: Stop the Open vSwitch service and clear existing OVSDB
+  shell: >
+    service openvswitch-switch stop ;
+    rm -rf /var/log/openvswitch/* ;
+    rm -rf /etc/openvswitch/conf.db ;
+    service openvswitch-switch start ;
+
+- name: Set ONOS as the manager
+  command: su -s /bin/sh -c "ovs-vsctl set-manager tcp:{{ hostvars[groups['onos'][0]]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}:6640;"
+

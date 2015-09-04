@@ -11,29 +11,49 @@ mkdir -p $WORK_DIR $WORK_DIR/cache
 
 cd $WORK_DIR
 
+function prepare_env()
+{
+    set +e
+    sudo mkisofs -version
+    if [[ $? -ne 0 ]]; then
+        sudo apt-get install genisoimage
+    fi
+    set -e
+}
+
 function download_git()
-{    
-     cd $WORK_DIR/cache/${1%.*}
-     if [[  -d ./.git ]]; then
-         git fetch origin master
-         git checkout origin/master
-     else     
-         git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
+{
+     if [[ -d $WORK_DIR/cache/${1%.*} ]]; then
+        if [[  -d $WORK_DIR/cache/${1%.*}/.git ]]; then
+
+             cd $WORK_DIR/cache/${1%.*}
+
+             git fetch origin master
+             git checkout origin/master
+
+             cd -
+
+             return
+         fi
+
+         rm -rf $WORK_DIR/cache/${1%.*}
      fi
-     cd -
+
+     git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
 }
 
 function download_url()
 {
+    rm -f $WORK_DIR/cache/$1.md5
     curl --connect-timeout 10 -o $WORK_DIR/cache/$1.md5 $2.md5
-    if [[ -f $WORK_DIR/cache/$1 ]]; then 
+    if [[ -f $WORK_DIR/cache/$1 ]]; then
         local_md5=`md5sum $WORK_DIR/cache/$1 | cut -d ' ' -f 1`
         repo_md5=`cat $WORK_DIR/cache/$1.md5 | cut -d ' ' -f 1`
         if [[ "$local_md5" == "$repo_md5" ]]; then
             return
         fi
     fi
-    
+
     curl --connect-timeout 10 -o $WORK_DIR/cache/$1 $2
 }
 
@@ -45,21 +65,18 @@ function download_local()
 function download_packages()
 {
      for i in $CENTOS_BASE $COMPASS_CORE $COMPASS_WEB $COMPASS_INSTALL $TRUSTY_JUNO_PPA \
-              $UBUNTU_ISO $CENTOS_ISO $CENTOS_PPA $LOADERS $CIRROS $PEXCEPT $APP_PACKAGE; do
+              $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $PEXCEPT $APP_PACKAGE; do
          name=`basename $i`
          if [[ ${name##*.} == "git" ]]; then
              download_git $name $i
          elif [[ ${i%%:*} == "http" ]]; then
              download_url $name $i
-         else 
+         else
              download_local $name $i
          fi
 
-         if [[ $? -ne 0 ]]; then
-             exit 1
-         fi
      done
-     
+
      git fetch
      git checkout origin/master -- $COMPASS_DIR/deploy/adapters
 }
@@ -71,13 +88,11 @@ function copy_file()
     # main process
     mkdir -p new/repos new/compass new/bootstrap new/pip new/guestimg new/app_packages
 
-    find . -name ".git" |xargs rm -rf
-
     cp -rf $SCRIPT_DIR/ks.cfg new/isolinux/ks.cfg
 
     rm -rf new/.rr_moved
 
-    for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS_PPA; do
+    for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA; do
         cp $WORK_DIR/cache/`basename $i` new/repos/ -rf
     done
 
@@ -89,6 +104,10 @@ function copy_file()
     for i in $COMPASS_CORE $COMPASS_INSTALL $COMPASS_WEB; do
         cp $WORK_DIR/cache/`basename $i | sed 's/.git//g'` new/compass/ -rf
     done
+
+    cp $COMPASS_DIR/deploy/adapters new/compass/compass-adapters -rf
+
+    find new/compass -name ".git" |xargs rm -rf
 }
 
 function make_iso()
@@ -101,14 +120,57 @@ function make_iso()
     sudo mount -o loop centos_base.iso base
     cd base;find .|cpio -pd ../new;cd -
     sudo umount base
-    chmod 755 ./new -R 
+    chmod 755 ./new -R
 
     copy_file $new
 
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
-    
+
+    md5sum compass.iso > compass.iso.md5
+
     # delete tmp file
     sudo rm -rf new base centos_base.iso
 }
 
+function copy_iso()
+{
+   if [[ $# -eq 0 ]]; then
+       return
+   fi
+
+   TEMP=`getopt -o d:f: --long iso-dir:,iso-name: -n 'build.sh' -- "$@"`
+
+   if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+   eval set -- "$TEMP"
+
+   dir=""
+   file=""
+
+   while :; do
+       case "$1" in
+           -d|--iso-dir) dir=$2; shift 2;;
+           -f|--iso-name) file=$2; shift 2;;
+           --) shift; break;;
+           *) echo "Internal error!" ; exit 1 ;;
+       esac
+   done
+
+   if [[ $dir == "" ]]; then
+       dir=$WORK_DIR
+   fi
+
+   if [[ $file == "" ]]; then
+       file="compass.iso"
+   fi
+
+   if [[ "$dir/$file" == "$WORK_DIR/compass.iso" ]]; then
+      return
+   fi
+
+   cp $WORK_DIR/compass.iso $dir/$file -f
+}
+
+prepare_env
 make_iso
+copy_iso $*

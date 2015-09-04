@@ -31,8 +31,8 @@
     - nova-compute
     - neutron-compute
 
-- hosts: odl
+- hosts: all
   remote_user: root
   sudo: True
   roles:
-    - odl
+    - odl_cluster

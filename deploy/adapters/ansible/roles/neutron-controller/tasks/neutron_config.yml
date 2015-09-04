@@ -9,4 +9,10 @@
   notify:
     - restart neutron control services
 
+- name: restart neutron-server
+  service: name=neutron-server  state=restarted enabled=yes
+  delegate_to: "{{ item }}"
+  run_once: True
+  with_items: groups['controller']
+
 - meta: flush_handlers

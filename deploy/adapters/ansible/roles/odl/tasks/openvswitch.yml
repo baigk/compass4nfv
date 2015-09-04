@@ -14,4 +14,3 @@
 
 - name: start and disable Neutron's agent services
   service: name=neutron-plugin-openvswitch-agent state=started
-

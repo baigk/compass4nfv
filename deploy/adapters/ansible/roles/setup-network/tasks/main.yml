@@ -32,3 +32,11 @@
          ip route add default via {{ item["gw"] }} dev {{ item["alias"] }}
   when: '"gw" in item'
   with_items: "{{ host_ip_settings }}"
+
+- name: copy net config
+  template:  src=my_configs.debian dest=/etc/network/interfaces.d/my_configs.cfg
+  when: ansible_os_family == "Debian"
+
+- name: source net config
+  lineinfile: dest=/etc/network/interfaces line='source /etc/network/interfaces.d/my_configs.cfg'
+  when: ansible_os_family == "Debian"

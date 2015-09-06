@@ -1,7 +1,7 @@
 ---
-- name: install java packages
+- name: install controller  packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
-  with_items: packages | union(packages_noarch)
+  with_items: controller_packages | union(controller_packages_noarch)
 
 #- name: install opendaylight packages
 #  apt: name={{ item }} state=present
@@ -142,10 +142,10 @@
 - name: Turn off neutron-server on control node
   service: name=neutron-server state=stopped
 
-- name: Install Crudini
-  apt: name={{ item }} state=present
-  with_items:
-    - crudini
+#- name: Install Crudini
+#  apt: name={{ item }} state=present
+#  with_items:
+#    - crudini
 
 - name: Run OpenVSwitch Script
   include: openvswitch.yml
@@ -161,10 +161,10 @@
 #    dest: "/opt/ml2_conf.sh"
 #    mode: 0777
 
-- name: Configure Neutron2
-  command: su -s /bin/sh -c "/opt/ml2_conf.sh;"
+#- name: Execute ML2 Configuration File
+#  command: su -s /bin/sh -c "/opt/ml2_conf.sh;"
 
-- name: Configure Neutron3
+- name: Configure Neutron2
   shell: >
     mysql -e "drop database if exists neutron_ml2;";
     mysql -e "create database neutron_ml2 character set utf8;";

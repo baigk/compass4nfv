@@ -65,6 +65,7 @@
     mkdir {{ onos_home }}/config;
     sed -i '/pre-stop/i\env JAVA_HOME=/usr/lib/jvm/java-8-oracle' {{ onos_home }}/debian/onos.conf;
     cp -rf {{ onos_home }}/debian/onos.conf /etc/init/;
+    cp -rf {{ onos_home }}/debian/onos.conf /etc/init.d/;
 #  notify:
 #    - restart onos service
   
@@ -93,15 +94,23 @@
   service: name=onos state=started enabled=yes
 
 - name: wait for restart time
-  shell: "sleep 100"
+  shell: "sleep 60"
 
 - name: start onos service
   service: name=onos state=restarted enabled=yes
 
 - name: wait for onos start time
-  shell: "sleep 50"
- 
+  shell: "sleep 60"
 
+- name: start onos service
+  service: name=onos state=restarted enabled=yes
+
+- name: wait for onos start time
+  shell: "sleep 100"
+
+- name: add onos auto start
+  shell: >
+    echo "onos">>/opt/service
 
 ##########################################################################################################
 ################################    ONOS connect with OpenStack   ################################
@@ -113,6 +122,7 @@
   shell: >
     crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers onos;
     crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan;
+    crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers vxlan
 
 - name: Create ML2 Configuration File
   template:
@@ -132,4 +142,4 @@
     su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron;
 
 - name: Restart neutron-server
-  service: name=neutron-server state=started
+  service: name=neutron-server state=restarted

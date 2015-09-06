@@ -1,10 +1,10 @@
-function destroy_nat_net() {
+function destroy_nat() {
     sudo virsh net-destroy $1  2>&1
     sudo virsh net-undefine $1 2>&1
     rm -rf $COMPASS_DIR/deploy/work/network/$1.xml
 }
 
-function destroy_bridge_net()
+function destroy_bridge()
 {
     bridge=$1
     nic=$2
@@ -24,7 +24,7 @@ function destroy_bridge_net()
     done
 }
 
-function create_bridge_net()
+function create_bridge()
 {
     bridge=$1
     nic=$2
@@ -51,12 +51,12 @@ function create_bridge_net()
 }
 
 function setup_om_bridge() {
-    destroy_bridge_net br_install $OM_NIC
-    create_bridge_net br_install $OM_NIC
+    destroy_bridge br_install $OM_NIC
+    create_bridge br_install $OM_NIC
 }
 
 function setup_om_nat() {
-    destroy_nets install
+    destroy_nat install
     # create install network
     sed -e "s/REPLACE_BRIDGE/br_install/g" \
         -e "s/REPLACE_NAME/install/g" \
@@ -72,7 +72,7 @@ function setup_om_nat() {
 }
 
 function create_nets() {
-    destroy_nets mgmt
+    destroy_nat mgmt
     # create mgmt network
     sed -e "s/REPLACE_BRIDGE/br_mgmt/g" \
         -e "s/REPLACE_NAME/mgmt/g" \

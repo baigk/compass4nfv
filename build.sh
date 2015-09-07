@@ -2,7 +2,7 @@
 set -ex
 
 SCRIPT_DIR=`cd ${BASH_SOURCE[0]%/*};pwd`
-COMPASS_DIR=`cd ${BASH_SOURCE[0]%/*}/../;pwd`
+COMPASS_DIR=${SCRIPT_DIR}
 WORK_DIR=$SCRIPT_DIR/work/building
 
 source $SCRIPT_DIR/build/build.conf
@@ -30,8 +30,8 @@ function download_git()
 
             cd $WORK_DIR/cache/${1%.*}
 
-            #git fetch origin master
-            #git checkout origin/master
+            git fetch origin master
+            git checkout origin/master
 
             cd -
 
@@ -51,7 +51,7 @@ function download_url()
     if [[ -f $WORK_DIR/cache/$1 ]]; then
         local_md5=`md5sum $WORK_DIR/cache/$1 | cut -d ' ' -f 1`
         repo_md5=`cat $WORK_DIR/cache/$1.md5 | cut -d ' ' -f 1`
-        if [[ "$local_md5" == "$repo_md5" ]]; then
+        if [[ $local_md5 == $repo_md5 ]]; then
             return
         fi
     fi
@@ -87,27 +87,27 @@ function copy_file()
     new=$1
 
     # main process
-    mkdir -p $new/repos $new/compass $new/bootstrap $new/pip $new/guestimg $new/app_packages
+    sudo mkdir -p $new/repos $new/compass $new/bootstrap $new/pip $new/guestimg $new/app_packages
 
-    cp -rf $SCRIPT_DIR/util/ks.cfg $new/isolinux/ks.cfg
+    sudo cp -rf $SCRIPT_DIR/util/ks.cfg $new/isolinux/ks.cfg
 
     sudo rm -rf $new/.rr_moved
 
     for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA; do
-        cp $WORK_DIR/cache/`basename $i` $new/repos/ -rf
+        sudo cp $WORK_DIR/cache/`basename $i` $new/repos/ -rf
     done
 
-    cp $WORK_DIR/cache/`basename $LOADERS` $new/ -rf || exit 1
-    cp $WORK_DIR/cache/`basename $CIRROS` $new/guestimg/ -rf || exit 1
-    cp $WORK_DIR/cache/`basename $APP_PACKAGE` $new/app_packages/ -rf || exit 1
+    sudo cp $WORK_DIR/cache/`basename $LOADERS` $new/ -rf || exit 1
+    sudo cp $WORK_DIR/cache/`basename $CIRROS` $new/guestimg/ -rf || exit 1
+    sudo cp $WORK_DIR/cache/`basename $APP_PACKAGE` $new/app_packages/ -rf || exit 1
 
     for i in $COMPASS_CORE $COMPASS_INSTALL $COMPASS_WEB; do
-        cp $WORK_DIR/cache/`basename $i | sed 's/.git//g'` $new/compass/ -rf
+        sudo cp $WORK_DIR/cache/`basename $i | sed 's/.git//g'` $new/compass/ -rf
     done
 
-    cp $COMPASS_DIR/deploy/adapters $new/compass/compass-adapters -rf
+    sudo cp $COMPASS_DIR/deploy/adapters $new/compass/compass-adapters -rf
 
-    tar -zxvf $WORK_DIR/cache/pip.tar.gz -C $new/
+    sudo tar -zxvf $WORK_DIR/cache/pip.tar.gz -C $new/
 
     find $new/compass -name ".git" |xargs sudo rm -rf
 }
@@ -116,10 +116,10 @@ function rebuild_ppa()
 {
     name=`basename $COMPASS_PKG`
     sudo rm -rf ${name%%.*} $name
-    cp $WORK_DIR/cache/$name $WORK_DIR
-    cp $SCRIPT_DIR/build/os/centos/comps.xml $WORK_DIR
-    tar -zxvf $name
-    cp ${name%%.*}/*.rpm $1/Packages -f
+    sudo cp $WORK_DIR/cache/$name $WORK_DIR
+    sudo cp $SCRIPT_DIR/build/os/centos/comps.xml $WORK_DIR
+    sudo tar -zxvf $name
+    sudo cp ${name%%.*}/*.rpm $1/Packages -f
     sudo rm -rf $1/repodata/*
     sudo createrepo -g $WORK_DIR/comps.xml $1
 }
@@ -128,9 +128,9 @@ function make_iso()
 {
     download_packages
     name=`basename $CENTOS_BASE`
-    cp  $WORK_DIR/cache/$name ./ -f
+    sudo cp  $WORK_DIR/cache/$name ./ -f
     # mount base iso
-    mkdir -p base
+    sudo mkdir -p base new
     sudo mount -o loop $name base
     cd base;find .|sudo cpio -pd ../new ;cd -
     sudo umount base

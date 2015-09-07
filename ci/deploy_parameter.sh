@@ -43,7 +43,7 @@ function generate_input_env_file()
 
     echo  '#input deployment  parameter' > $ofile
 
-    cfg_file=`ls ../deploy/conf/{base,"$TYPE"_"$FLAVOR",$TYPE,$FLAVOR}.conf`
+    cfg_file=`ls ../deploy/conf/{base,"$TYPE"_"$FLAVOR",$TYPE,$FLAVOR}.conf >/dev/null 2>&1`
     option_name=`get_option_name_list "$cfg_file"`
     option_flag=`get_option_flag_list "$option_name"`
 

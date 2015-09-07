@@ -23,23 +23,23 @@ function prepare_env()
 
 function download_git()
 {
-     if [[ -d $WORK_DIR/cache/${1%.*} ]]; then
-        if [[  -d $WORK_DIR/cache/${1%.*}/.git ]]; then
+    if [[ -d $WORK_DIR/cache/${1%.*} ]]; then
+       if [[  -d $WORK_DIR/cache/${1%.*}/.git ]]; then
 
-             cd $WORK_DIR/cache/${1%.*}
+            cd $WORK_DIR/cache/${1%.*}
 
-             git fetch origin master
-             git checkout origin/master
+            #git fetch origin master
+            #git checkout origin/master
 
-             cd -
+            cd -
 
-             return
-         fi
+            return
+        fi
 
-         rm -rf $WORK_DIR/cache/${1%.*}
-     fi
+        rm -rf $WORK_DIR/cache/${1%.*}
+    fi
 
-     git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
+    git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
 }
 
 function download_url()
@@ -64,17 +64,16 @@ function download_local()
 
 function download_packages()
 {
-     for i in $CENTOS_BASE $COMPASS_CORE $COMPASS_WEB $COMPASS_INSTALL $TRUSTY_JUNO_PPA \
-              $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $PEXCEPT $APP_PACKAGE; do
+     for i in $CENTOS_BASE $COMPASS_CORE $COMPASS_WEB $COMPASS_INSTALL $TRUSTY_JUNO_PPA $UBUNTU_ISO \
+              $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $APP_PACKAGE $COMPASS_PKG $PIP_REPO; do
          name=`basename $i`
          if [[ ${name##*.} == "git" ]]; then
-             download_git $name $i
-         elif [[ ${i%%:*} == "http" ]]; then
-             download_url $name $i
+             download_git  $name $i
+         elif [[ "https?" =~ ${i%%:*} ]]; then
+             download_url  $name $i
          else
              download_local $name $i
          fi
-
      done
 
      git fetch
@@ -86,50 +85,68 @@ function copy_file()
     new=$1
 
     # main process
-    mkdir -p new/repos new/compass new/bootstrap new/pip new/guestimg new/app_packages
+    mkdir -p $new/repos $new/compass $new/bootstrap $new/pip $new/guestimg $new/app_packages
 
-    cp -rf $SCRIPT_DIR/ks.cfg new/isolinux/ks.cfg
+    cp -rf $SCRIPT_DIR/ks.cfg $new/isolinux/ks.cfg
 
-    rm -rf new/.rr_moved
+    rm -rf $new/.rr_moved
 
     for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA; do
-        cp $WORK_DIR/cache/`basename $i` new/repos/ -rf
+        cp $WORK_DIR/cache/`basename $i` $new/repos/ -rf
     done
 
-    cp $WORK_DIR/cache/`basename $LOADERS` new/ -rf || exit 1
-    cp $WORK_DIR/cache/`basename $CIRROS` new/guestimg/ -rf || exit 1
-    cp $WORK_DIR/cache/`basename $APP_PACKAGE` new/app_packages/ -rf || exit 1
-    cp $WORK_DIR/cache/`basename $PEXCEPT` new/pip/ -rf || exit 1
+    cp $WORK_DIR/cache/`basename $LOADERS` $new/ -rf || exit 1
+    cp $WORK_DIR/cache/`basename $CIRROS` $new/guestimg/ -rf || exit 1
+    cp $WORK_DIR/cache/`basename $APP_PACKAGE` $new/app_packages/ -rf || exit 1
 
     for i in $COMPASS_CORE $COMPASS_INSTALL $COMPASS_WEB; do
-        cp $WORK_DIR/cache/`basename $i | sed 's/.git//g'` new/compass/ -rf
+        cp $WORK_DIR/cache/`basename $i | sed 's/.git//g'` $new/compass/ -rf
     done
 
-    cp $COMPASS_DIR/deploy/adapters new/compass/compass-adapters -rf
+    cp $COMPASS_DIR/deploy/adapters $new/compass/compass-adapters -rf
 
-    find new/compass -name ".git" |xargs rm -rf
+    tar -zxvf $WORK_DIR/cache/pip.tar.gz -C $new/
+
+    find $new/compass -name ".git" |xargs rm -rf
+}
+
+function rebuild_ppa()
+{
+    name=`basename $COMPASS_PKG`
+    rm -rf ${name%%.*} $name
+    cp $WORK_DIR/cache/$name $WORK_DIR
+    cp $SCRIPT_DIR/centos6/comps.xml $WORK_DIR
+    tar -zxvf $name
+    cp ${name%%.*}/*.rpm $1/Packages -f
+    rm -rf $1/repodata/*
+    createrepo -g $WORK_DIR/comps.xml $1
 }
 
 function make_iso()
 {
-
     download_packages
-    cp  $WORK_DIR/cache/centos_base.iso ./ -f
+    name=`basename $CENTOS_BASE`
+    cp  $WORK_DIR/cache/$name ./ -f
     # mount base iso
     mkdir -p base
-    sudo mount -o loop centos_base.iso base
-    cd base;find .|cpio -pd ../new;cd -
+    sudo mount -o loop $name base
+    cd base;find .|cpio -pd ../new >/dev/null 2>&1;cd -
     sudo umount base
     chmod 755 ./new -R
 
-    copy_file $new
+    copy_file new
+    rebuild_ppa new
 
-    sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o compass.iso new/
+    sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin \
+                 -no-emul-boot -boot-load-size 4 \
+                 -boot-info-table -hide-rr-moved \
+                 -x "lost+found:" \
+                 -o compass.iso new/
 
     md5sum compass.iso > compass.iso.md5
 
     # delete tmp file
-    sudo rm -rf new base centos_base.iso
+    sudo rm -rf new base $name
 }
 
 function copy_iso()

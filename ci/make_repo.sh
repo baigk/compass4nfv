@@ -5,7 +5,7 @@ WORK_PATH=$(cd "$(dirname "$0")"; pwd)
 
 function process_env()
 {
-    mkdir -p ${WORK_PATH}/work/repo/
+    mkdir -p ${WORK_PATH}/work/repo/ ${WORK_PATH}/work/repo/pip
 
     set +e
     sudo docker info
@@ -19,7 +19,7 @@ function process_env()
 cat <<EOF >${WORK_PATH}/work/repo/cp_repo.sh
 #!/bin/bash
 set -ex
-cp /*ppa.tar.gz /result
+cp /*.tar.gz /result
 EOF
 
     sudo apt-get install python-yaml -y
@@ -31,14 +31,14 @@ function make_repo()
     rm -f ${WORK_PATH}/work/repo/install_packages.sh
     rm -f ${WORK_PATH}/work/repo/Dockerfile
 
-    TEMP=`getopt -o h -l os-tag:,openstack-tag:,tmpl:,default-package:,special-package:,ansible-dir: -n 'make_repo.sh' -- "$@"`
+    TEMP=`getopt -o h -l os-tag:,package-tag:,tmpl:,default-package:,special-package:,ansible-dir: -n 'make_repo.sh' -- "$@"`
 
     if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
     eval set -- "$TEMP"
 
     os_tag=""
-    openstack_tag=""
+    package_tag=""
     tmpl=""
     default_package=""
     special_package=""
@@ -47,7 +47,7 @@ function make_repo()
     while :; do
         case "$1" in
             --os-tag) os_tag=$2; shift 2;;
-            --openstack-tag) openstack_tag=$2; shift 2;;
+            --package-tag) package_tag=$2; shift 2;;
             --tmpl) tmpl=$2; shift 2;;
             --default-package) default_package=$2; shift 2;;
             --special-package) special_package=$2; shift 2;;
@@ -58,7 +58,12 @@ function make_repo()
         esac
     done
 
-    if [[ -z ${os_tag} || -z ${openstack_tag} || -z ${tmpl} || -z ${ansible_dir} ]]; then
+    if [[ ! -z ${package_tag} && ${package_tag} == "pip" ]]; then
+        make_pip_repo
+        return
+    fi
+
+    if [[ -z ${os_tag} || -z ${tmpl} || -z ${package_tag} ]]; then
         echo "parameter is wrong"
         exit 1
     fi
@@ -72,20 +77,24 @@ function make_repo()
     fi
 
     dockerfile=Dockerfile
-    docker_tmpl=${WORK_PATH}/${os_tag}/${openstack_tag}/${dockerfile}".tmpl"
-    docker_tag="${os_tag}/openstack-${openstack_tag}"
+    docker_tmpl=${WORK_PATH}/${os_tag}/${package_tag}/${dockerfile}".tmpl"
+    docker_tag="${os_tag}/${package_tag}"
 
-    python gen_ins_pkg_script.py ${ansible_dir} ${arch} ${tmpl} \
-               ${docker_tmpl} "${default_package}" "${special_package}" "${special_package_dir}"
+    python gen_ins_pkg_script.py "${ansible_dir}" "${arch}" "${WORK_PATH}/templates/${tmpl}" \
+               "${docker_tmpl}" "${default_package}" "${special_package}" "${special_package_dir}"
 
-    if [[ -d ${WORK_PATH}/$arch ]]; then
+    if [[ -n $arch && -d ${WORK_PATH}/$arch ]]; then
         rm -rf ${WORK_PATH}/work/repo/$arch
         cp -rf ${WORK_PATH}/$arch ${WORK_PATH}/work/repo/
     fi
 
-    if [[ -d ${WORK_PATH}/$os_tag ]]; then
+    if [[ -n $os_tag && -d ${WORK_PATH}/$os_tag ]]; then
         rm -rf ${WORK_PATH}/work/repo/$os_tag
-        cp -rf ${WORK_PATH}/$os_tag ${WORK_PATH}/work/repo/centos7
+        cp -rf ${WORK_PATH}/$os_tag ${WORK_PATH}/work/repo
+    fi
+
+    if [[ -f ${WORK_PATH}/$os_tag/base.repo ]]; then
+        cp ${WORK_PATH}/$os_tag/base.repo ${WORK_PATH}/work/repo/
     fi
 
     sudo docker build -t ${docker_tag} -f ${WORK_PATH}/work/repo/${dockerfile} ${WORK_PATH}/work/repo/
@@ -97,32 +106,57 @@ function make_repo()
     sudo docker rmi -f ${image_id}
 }
 
+function make_pip_repo()
+{
+    source $WORK_PATH/build.conf
+
+    if [[ $PIP_CONF == "" ]]; then
+        return
+    fi
+
+    for i in $PIP_CONF; do
+        curl --connect-timeout 10 -o $WORK_PATH/work/repo/pip/`basename $i` $i
+    done
+
+    cd $WORK_PATH/work/repo; tar -zcvf pip.tar.gz ./pip; cd -
+}
+
 function make_all_repo()
 {
-    make_repo --os-tag trusty --openstack-tag juno \
+    make_pip_repo
+
+    make_repo --os-tag centos6 --package-tag compass \
+              --tmpl compass_core.tmpl \
+              --default-package "epel-release python-yaml python-jinja2 python-paramiko"
+
+    make_repo --os-tag trusty --package-tag juno \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl Debian_juno.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
-    make_repo --os-tag trusty --openstack-tag kilo \
+    make_repo --os-tag trusty --package-tag kilo \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl Debian_kilo.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
-    make_repo --os-tag centos7 --openstack-tag juno \
+    make_repo --os-tag centos7 --package-tag juno \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl RedHat_juno.tmpl \
               --default-package "strace net-tools wget vim openssh-server dracut-config-rescue dracut-network" \
               --special-package ""
-
 }
 
-process_env
+function main()
+{
+    process_env
 
-if [[ $# -eq 0 ]]; then
-    make_all_repo
-else
-    make_repo $*
-fi
+    if [[ $# -eq 0 ]]; then
+        make_all_repo
+    else
+        make_repo $*
+    fi
+}
+
+main $*

@@ -14,7 +14,7 @@ cd $WORK_DIR
 function prepare_env()
 {
     set +e
-    for i in createrepo genisoimage; do
+    for i in createrepo genisoimage curl; do
         sudo $i --version
         if [[ $? -ne 0 ]]; then
             sudo apt-get install $i -y

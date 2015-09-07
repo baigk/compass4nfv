@@ -86,18 +86,15 @@ function make_repo()
     python ${BUILD_PATH}/gen_ins_pkg_script.py "${ansible_dir}" "${arch}" "${BUILD_PATH}/templates/${tmpl}" \
                "${docker_tmpl}" "${default_package}" "${special_package}" "${special_package_dir}"
 
-    if [[ -n $arch && -d ${WORK_PATH}/$arch ]]; then
+    # copy make package script to work/repo dir
+    if [[ -n $arch && -d ${WORK_PATH}/build/templates/$arch ]]; then
         rm -rf ${WORK_PATH}/work/repo/$arch
-        cp -rf ${WORK_PATH}/$arch ${WORK_PATH}/work/repo/
+        cp -rf ${WORK_PATH}/build/templates/$arch ${WORK_PATH}/work/repo/
     fi
 
-    if [[ -n $os_ver && -d ${WORK_PATH}/$os_ver ]]; then
+    if [[ -n $os_ver && -d ${WORK_PATH}/build/os/$os_name/$os_ver ]]; then
         rm -rf ${WORK_PATH}/work/repo/$os_ver
-        cp -rf ${WORK_PATH}/$os_ver ${WORK_PATH}/work/repo
-    fi
-
-    if [[ -f ${WORK_PATH}/$os_ver/base.repo ]]; then
-        cp ${WORK_PATH}/$os_ver/base.repo ${WORK_PATH}/work/repo/
+        cp -rf ${WORK_PATH}/build/os/$os_name/$os_ver ${WORK_PATH}/work/repo
     fi
 
     sudo docker build -t ${docker_tag} -f ${WORK_PATH}/work/repo/${dockerfile} ${WORK_PATH}/work/repo/
@@ -133,19 +130,19 @@ function make_all_repo()
               --default-package "epel-release python-yaml python-jinja2 python-paramiko"
 
     make_repo --os-ver trusty --package-tag juno \
-              --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
+              --ansible-dir $WORK_PATH/deploy/adapters/ansible \
               --tmpl Debian_juno.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
     make_repo --os-ver trusty --package-tag kilo \
-              --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
+              --ansible-dir $WORK_PATH/deploy/adapters/ansible \
               --tmpl Debian_kilo.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
     make_repo --os-ver centos7 --package-tag juno \
-              --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
+              --ansible-dir $WORK_PATH/deploy/adapters/ansible \
               --tmpl RedHat_juno.tmpl \
               --default-package "strace net-tools wget vim openssh-server dracut-config-rescue dracut-network" \
               --special-package ""

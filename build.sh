@@ -15,7 +15,7 @@ function prepare_env()
 {
     set +e
     for i in createrepo genisoimage curl; do
-        sudo $i --version
+        sudo $i --version >/dev/null 2>&1
         if [[ $? -ne 0 ]]; then
             sudo apt-get install $i -y
         fi
@@ -69,7 +69,7 @@ function download_packages()
      for i in $CENTOS_BASE $COMPASS_CORE $COMPASS_WEB $COMPASS_INSTALL $TRUSTY_JUNO_PPA $UBUNTU_ISO \
               $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $APP_PACKAGE $COMPASS_PKG $PIP_REPO; do
          name=`basename $i`
-         if [[ ${name##*.} == "git" ]]; then
+         if [[ ${name##*.} == git ]]; then
              download_git  $name $i
          elif [[ "https?" =~ ${i%%:*} ]]; then
              download_url  $name $i

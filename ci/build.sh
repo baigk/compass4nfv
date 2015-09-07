@@ -3,9 +3,9 @@ set -ex
 
 SCRIPT_DIR=`cd ${BASH_SOURCE[0]%/*};pwd`
 COMPASS_DIR=`cd ${BASH_SOURCE[0]%/*}/../;pwd`
-WORK_DIR=$SCRIPT_DIR/work/build
+WORK_DIR=$SCRIPT_DIR/work/building
 
-source $SCRIPT_DIR/build.conf
+source $SCRIPT_DIR/build/build.conf
 
 mkdir -p $WORK_DIR $WORK_DIR/cache
 
@@ -14,10 +14,12 @@ cd $WORK_DIR
 function prepare_env()
 {
     set +e
-    sudo mkisofs -version
-    if [[ $? -ne 0 ]]; then
-        sudo apt-get install genisoimage
-    fi
+    for i in createrepo genisoimage; do
+        sudo $i --version
+        if [[ $? -ne 0 ]]; then
+            sudo apt-get install $i -y
+        fi
+    done
     set -e
 }
 
@@ -36,7 +38,7 @@ function download_git()
             return
         fi
 
-        rm -rf $WORK_DIR/cache/${1%.*}
+        sudo rm -rf $WORK_DIR/cache/${1%.*}
     fi
 
     git clone $2 $WORK_DIR/cache/`basename $i | sed 's/.git//g'`
@@ -44,7 +46,7 @@ function download_git()
 
 function download_url()
 {
-    rm -f $WORK_DIR/cache/$1.md5
+    sudo rm -f $WORK_DIR/cache/$1.md5
     curl --connect-timeout 10 -o $WORK_DIR/cache/$1.md5 $2.md5
     if [[ -f $WORK_DIR/cache/$1 ]]; then
         local_md5=`md5sum $WORK_DIR/cache/$1 | cut -d ' ' -f 1`
@@ -87,9 +89,9 @@ function copy_file()
     # main process
     mkdir -p $new/repos $new/compass $new/bootstrap $new/pip $new/guestimg $new/app_packages
 
-    cp -rf $SCRIPT_DIR/ks.cfg $new/isolinux/ks.cfg
+    cp -rf $SCRIPT_DIR/util/ks.cfg $new/isolinux/ks.cfg
 
-    rm -rf $new/.rr_moved
+    sudo rm -rf $new/.rr_moved
 
     for i in $TRUSTY_JUNO_PPA $UBUNTU_ISO $CENTOS_ISO $CENTOS7_JUNO_PPA; do
         cp $WORK_DIR/cache/`basename $i` $new/repos/ -rf
@@ -107,19 +109,19 @@ function copy_file()
 
     tar -zxvf $WORK_DIR/cache/pip.tar.gz -C $new/
 
-    find $new/compass -name ".git" |xargs rm -rf
+    find $new/compass -name ".git" |xargs sudo rm -rf
 }
 
 function rebuild_ppa()
 {
     name=`basename $COMPASS_PKG`
-    rm -rf ${name%%.*} $name
+    sudo rm -rf ${name%%.*} $name
     cp $WORK_DIR/cache/$name $WORK_DIR
-    cp $SCRIPT_DIR/centos6/comps.xml $WORK_DIR
+    cp $SCRIPT_DIR/build/os/centos/comps.xml $WORK_DIR
     tar -zxvf $name
     cp ${name%%.*}/*.rpm $1/Packages -f
-    rm -rf $1/repodata/*
-    createrepo -g $WORK_DIR/comps.xml $1
+    sudo rm -rf $1/repodata/*
+    sudo createrepo -g $WORK_DIR/comps.xml $1
 }
 
 function make_iso()
@@ -130,9 +132,9 @@ function make_iso()
     # mount base iso
     mkdir -p base
     sudo mount -o loop $name base
-    cd base;find .|cpio -pd ../new >/dev/null 2>&1;cd -
+    cd base;find .|sudo cpio -pd ../new ;cd -
     sudo umount base
-    chmod 755 ./new -R
+    sudo chmod 755 ./new -R
 
     copy_file new
     rebuild_ppa new

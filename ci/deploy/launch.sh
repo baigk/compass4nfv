@@ -3,8 +3,8 @@ WORK_DIR=$COMPASS_DIR/ci/work/deploy
 
 mkdir -p $WORK_DIR/script
 
-source ${COMPASS_DIR}/ci/log.sh
-source ${COMPASS_DIR}/ci/deploy_parameter.sh
+source ${COMPASS_DIR}/ci/util/log.sh
+source ${COMPASS_DIR}/ci/deploy/deploy_parameter.sh
 source $(process_default_para $*) || exit 1
 source $(process_input_para $*) || exit 1
 source ${COMPASS_DIR}/deploy/conf/${FLAVOR}.conf

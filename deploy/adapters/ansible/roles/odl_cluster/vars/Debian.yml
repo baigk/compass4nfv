@@ -1,7 +1,7 @@
 ---
 
 controller_packages:
-  - openjdk-7-jdk
+#  - openjdk-7-jdk
   - crudini
 
 compute_packages:

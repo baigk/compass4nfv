@@ -97,6 +97,10 @@ function make_repo()
         cp -rf ${WORK_PATH}/build/os/$os_name/$os_ver ${WORK_PATH}/work/repo
     fi
 
+    if [[ -f ${WORK_PATH}/build/os/$os_name/comps.xml ]]; then
+        cp -rf ${WORK_PATH}/build/os/$os_name/comps.xml ${WORK_PATH}/work/repo
+    fi
+
     sudo docker build -t ${docker_tag} -f ${WORK_PATH}/work/repo/${dockerfile} ${WORK_PATH}/work/repo/
 
     sudo docker run -t -v ${WORK_PATH}/work/repo:/result ${docker_tag}
@@ -123,7 +127,7 @@ function make_pip_repo()
 
 function make_all_repo()
 {
-#    make_pip_repo
+    make_pip_repo
 
     make_repo --os-ver centos6 --package-tag compass \
               --tmpl compass_core.tmpl \

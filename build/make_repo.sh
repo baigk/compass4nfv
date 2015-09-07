@@ -1,7 +1,8 @@
 #!/bin/bash
 set -ex
 
-WORK_PATH=$(cd "$(dirname "$0")"; pwd)
+BUILD_PATH=$(cd "$(dirname "$0")"; pwd)
+WORK_PATH=$(cd "$(dirname "$0")"/..; pwd)
 
 function process_env()
 {
@@ -31,13 +32,13 @@ function make_repo()
     rm -f ${WORK_PATH}/work/repo/install_packages.sh
     rm -f ${WORK_PATH}/work/repo/Dockerfile
 
-    TEMP=`getopt -o h -l os-tag:,package-tag:,tmpl:,default-package:,special-package:,ansible-dir: -n 'make_repo.sh' -- "$@"`
+    TEMP=`getopt -o h -l os-ver:,package-tag:,tmpl:,default-package:,special-package:,ansible-dir: -n 'make_repo.sh' -- "$@"`
 
     if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
 
     eval set -- "$TEMP"
 
-    os_tag=""
+    os_ver=""
     package_tag=""
     tmpl=""
     default_package=""
@@ -46,7 +47,7 @@ function make_repo()
     ansible_dir=""
     while :; do
         case "$1" in
-            --os-tag) os_tag=$2; shift 2;;
+            --os-ver) os_ver=$2; shift 2;;
             --package-tag) package_tag=$2; shift 2;;
             --tmpl) tmpl=$2; shift 2;;
             --default-package) default_package=$2; shift 2;;
@@ -63,24 +64,26 @@ function make_repo()
         return
     fi
 
-    if [[ -z ${os_tag} || -z ${tmpl} || -z ${package_tag} ]]; then
+    if [[ -z ${os_ver} || -z ${tmpl} || -z ${package_tag} ]]; then
         echo "parameter is wrong"
         exit 1
     fi
 
-    if [[ ${os_tag} == "trusty" ]]; then
+    if [[ ${os_ver} == trusty ]]; then
         arch=Debian
+        os_name=ubuntu
     fi
 
-    if [[ ${os_tag} == "centos7" ]]; then
+    if [[ ${os_ver} =~ centos[0-9]*$ ]]; then
         arch=RedHat
+        os_name=centos
     fi
 
     dockerfile=Dockerfile
-    docker_tmpl=${WORK_PATH}/${os_tag}/${package_tag}/${dockerfile}".tmpl"
-    docker_tag="${os_tag}/${package_tag}"
+    docker_tmpl=${BUILD_PATH}/os/${os_name}/${os_ver}/${package_tag}/${dockerfile}".tmpl"
+    docker_tag="${os_ver}/${package_tag}"
 
-    python gen_ins_pkg_script.py "${ansible_dir}" "${arch}" "${WORK_PATH}/templates/${tmpl}" \
+    python ${BUILD_PATH}/gen_ins_pkg_script.py "${ansible_dir}" "${arch}" "${BUILD_PATH}/templates/${tmpl}" \
                "${docker_tmpl}" "${default_package}" "${special_package}" "${special_package_dir}"
 
     if [[ -n $arch && -d ${WORK_PATH}/$arch ]]; then
@@ -88,13 +91,13 @@ function make_repo()
         cp -rf ${WORK_PATH}/$arch ${WORK_PATH}/work/repo/
     fi
 
-    if [[ -n $os_tag && -d ${WORK_PATH}/$os_tag ]]; then
-        rm -rf ${WORK_PATH}/work/repo/$os_tag
-        cp -rf ${WORK_PATH}/$os_tag ${WORK_PATH}/work/repo
+    if [[ -n $os_ver && -d ${WORK_PATH}/$os_ver ]]; then
+        rm -rf ${WORK_PATH}/work/repo/$os_ver
+        cp -rf ${WORK_PATH}/$os_ver ${WORK_PATH}/work/repo
     fi
 
-    if [[ -f ${WORK_PATH}/$os_tag/base.repo ]]; then
-        cp ${WORK_PATH}/$os_tag/base.repo ${WORK_PATH}/work/repo/
+    if [[ -f ${WORK_PATH}/$os_ver/base.repo ]]; then
+        cp ${WORK_PATH}/$os_ver/base.repo ${WORK_PATH}/work/repo/
     fi
 
     sudo docker build -t ${docker_tag} -f ${WORK_PATH}/work/repo/${dockerfile} ${WORK_PATH}/work/repo/
@@ -123,25 +126,25 @@ function make_pip_repo()
 
 function make_all_repo()
 {
-    make_pip_repo
+#    make_pip_repo
 
-    make_repo --os-tag centos6 --package-tag compass \
+    make_repo --os-ver centos6 --package-tag compass \
               --tmpl compass_core.tmpl \
               --default-package "epel-release python-yaml python-jinja2 python-paramiko"
 
-    make_repo --os-tag trusty --package-tag juno \
+    make_repo --os-ver trusty --package-tag juno \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl Debian_juno.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
-    make_repo --os-tag trusty --package-tag kilo \
+    make_repo --os-ver trusty --package-tag kilo \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl Debian_kilo.tmpl \
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
-    make_repo --os-tag centos7 --package-tag juno \
+    make_repo --os-ver centos7 --package-tag juno \
               --ansible-dir $WORK_PATH/../deploy/adapters/ansible \
               --tmpl RedHat_juno.tmpl \
               --default-package "strace net-tools wget vim openssh-server dracut-config-rescue dracut-network" \

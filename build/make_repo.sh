@@ -74,7 +74,7 @@ function make_repo()
         os_name=ubuntu
     fi
 
-    if [[ ${os_ver} =~ centos[0-9]*$ ]]; then
+    if [[ ${os_ver} =~ rhel[0-9]*$ ]]; then
         arch=RedHat
         os_name=centos
     fi
@@ -112,7 +112,7 @@ function make_repo()
 
 function make_pip_repo()
 {
-    source $WORK_PATH/build.conf
+    source $WORK_PATH/build/build.conf
 
     if [[ $PIP_CONF == "" ]]; then
         return
@@ -129,7 +129,7 @@ function make_all_repo()
 {
     make_pip_repo
 
-    make_repo --os-ver centos6 --package-tag compass \
+    make_repo --os-ver rhel6 --package-tag compass \
               --tmpl compass_core.tmpl \
               --default-package "epel-release python-yaml python-jinja2 python-paramiko"
 
@@ -145,7 +145,7 @@ function make_all_repo()
               --default-package "openssh-server" \
               --special-package "openvswitch-datapath-dkms openvswitch-switch"
 
-    make_repo --os-ver centos7 --package-tag juno \
+    make_repo --os-ver rhel7 --package-tag juno \
               --ansible-dir $WORK_PATH/deploy/adapters/ansible \
               --tmpl RedHat_juno.tmpl \
               --default-package "strace net-tools wget vim openssh-server dracut-config-rescue dracut-network" \

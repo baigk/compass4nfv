@@ -12,7 +12,7 @@ function get_option_flag_list()
 
 function get_conf_name()
 {
-    cfg_file=`ls ../deploy/conf/*.conf`
+    cfg_file=`ls $COMPASS_DIR/deploy/conf/*.conf`
     option_name=`get_option_name_list "$cfg_file"`
     option_flag=`get_option_flag_list "$option_name"`
 
@@ -43,7 +43,7 @@ function generate_input_env_file()
 
     echo  '#input deployment  parameter' > $ofile
 
-    cfg_file=`ls ../deploy/conf/{base,"$TYPE"_"$FLAVOR",$TYPE,$FLAVOR}.conf >/dev/null 2>&1`
+    cfg_file=`ls $COMPASS_DIR/deploy/conf/{base,"$TYPE"_"$FLAVOR",$TYPE,$FLAVOR}.conf 2>/dev/null`
     option_name=`get_option_name_list "$cfg_file"`
     option_flag=`get_option_flag_list "$option_name"`
 

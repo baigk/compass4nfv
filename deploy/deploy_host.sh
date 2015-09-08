@@ -1,11 +1,11 @@
 function deploy_host(){
     NETWORK_FILE=${COMPASS_DIR}/deploy/conf/network_cfg.yaml
     NEUTRON_FILE=${COMPASS_DIR}/deploy/conf/neutron_cfg.yaml
-    
+
     pip install oslo.config
     ssh $ssh_args root@${COMPASS_SERVER} mkdir -p /opt/compass/bin/ansible_callbacks
     scp $ssh_args -r ${COMPASS_DIR}/deploy/status_callback.py root@${COMPASS_SERVER}:/opt/compass/bin/ansible_callbacks/status_callback.py
-    
+
     reboot_hosts
 
     python ${COMPASS_DIR}/deploy/client.py --compass_server="${COMPASS_SERVER_URL}" \

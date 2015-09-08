@@ -21,7 +21,7 @@ function prepare_env()
         fi
     done
     set -e
- 
+
     if [[ ! -d $CACHE_DIR ]]; then
         mkdir -p $CACHE_DIR
     fi
@@ -159,11 +159,11 @@ function make_iso()
 function process_param()
 {
     TEMP=`getopt -o c:d:f: --long iso-dir:,iso-name:,cache-dir: -n 'build.sh' -- "$@"`
- 
+
     if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
- 
+
     eval set -- "$TEMP"
- 
+
     while :; do
         case "$1" in
             -d|--iso-dir) export ISO_DIR=$2; shift 2;;

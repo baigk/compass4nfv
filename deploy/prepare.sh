@@ -28,7 +28,7 @@ function prepare_env() {
     sudo pip install --upgrade netaddr
     sudo pip install --upgrade oslo.config
     sudo service libvirt-bin restart
-   
+
     # prepare work dir
     rm -rf $WORK_DIR/{installer,vm,network,iso,venv}
     mkdir -p $WORK_DIR/installer

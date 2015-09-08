@@ -14,25 +14,25 @@ sys_intf_mappings:
   - name: storage
     interface: eth1
     vlan_tag: 3
-  - name: external 
+  - name: external
     interface: br-prv
     vlan_tag: 4
 
 ip_settings:
   - name: mgmt
-    ip_ranges: 
+    ip_ranges:
     - - "172.16.1.1"
       - "172.16.1.254"
     cidr: "172.16.1.0/24"
 
   - name: storage
-    ip_ranges: 
+    ip_ranges:
     - - "172.16.2.1"
       - "172.16.2.254"
     cidr: "172.16.2.0/24"
 
   - name: external
-    ip_ranges: 
+    ip_ranges:
     - - "172.16.3.2"
       - "172.16.3.100"
     cidr: "172.16.3.0/24"

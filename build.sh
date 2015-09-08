@@ -71,7 +71,7 @@ function download_local()
 function download_packages()
 {
      for i in $CENTOS_BASE $COMPASS_CORE $COMPASS_WEB $COMPASS_INSTALL $TRUSTY_JUNO_PPA $UBUNTU_ISO \
-              $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $APP_PACKAGE $COMPASS_PKG $PIP_REPO; do
+              $CENTOS_ISO $CENTOS7_JUNO_PPA $LOADERS $CIRROS $APP_PACKAGE $COMPASS_PKG $PIP_REPO $ANSIBLE_MODULE; do
          name=`basename $i`
          if [[ ${name##*.} == git ]]; then
              download_git  $name $i
@@ -91,7 +91,7 @@ function copy_file()
     new=$1
 
     # main process
-    sudo mkdir -p $new/repos $new/compass $new/bootstrap $new/pip $new/guestimg $new/app_packages
+    sudo mkdir -p $new/repos $new/compass $new/bootstrap $new/pip $new/guestimg $new/app_packages $new/ansible
 
     sudo cp -rf $SCRIPT_DIR/util/ks.cfg $new/isolinux/ks.cfg
 
@@ -104,6 +104,7 @@ function copy_file()
     sudo cp $CACHE_DIR/`basename $LOADERS` $new/ -rf || exit 1
     sudo cp $CACHE_DIR/`basename $CIRROS` $new/guestimg/ -rf || exit 1
     sudo cp $CACHE_DIR/`basename $APP_PACKAGE` $new/app_packages/ -rf || exit 1
+    sudo cp $CACHE_DIR/`basename $ANSIBLE_MODULE | sed 's/.git//g'`  $new/ansible/ -rf || exit 1
 
     for i in $COMPASS_CORE $COMPASS_INSTALL $COMPASS_WEB; do
         sudo cp $CACHE_DIR/`basename $i | sed 's/.git//g'` $new/compass/ -rf

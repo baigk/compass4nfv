@@ -1,8 +1,6 @@
 openvswitch:
   tenant_network_type: vxlan
   network_vlan_ranges:
-    - 'internal:1:4094'
-    - 'external:1:4094'
+    - 'physnet:1:4094'
   bridge_mappings:
-    - 'internal:br-prv'
-    - 'external:br-ex'
+    - 'physnet:br-prv'

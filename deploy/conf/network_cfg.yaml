@@ -1,10 +1,11 @@
-used_nics: 
-  - eth1
-  - eth2
-  - eth3
-
 nic_mappings: []
 bond_mappings: []
+
+provider_net_mappings:
+  - name: br-prv
+    network: physnet
+    interface: eth1
+    type: ovs
 
 sys_intf_mappings:
   - name: mgmt
@@ -14,7 +15,8 @@ sys_intf_mappings:
     interface: eth1
     vlan_tag: 3
   - name: external 
-    interface: br-ex
+    interface: br-prv
+    vlan_tag: 4
 
 ip_settings:
   - name: mgmt
@@ -33,18 +35,19 @@ ip_settings:
     ip_ranges: 
     - - "172.16.3.2"
       - "172.16.3.100"
-    floating_ip_ranges:
-     - "172.16.3.100"
-     - "172.16.3.254"
-
     cidr: "172.16.3.0/24"
     gw: "172.16.3.1"
 
-provider_net_mappings:
-  - name: br-ex
-    interface: eth2
-    type: ovs
-
-  - name: br-prv
-    interface: eth3
-    type: ovs
+public_net_info:
+  network: ext-net
+  type: vlan
+  segment_id: 1000
+  subnet: ext-subnet
+  provider_network: physnet
+  router: router-ext
+  enable_dhcp: False
+  no_gateway: False
+  external_gw: "172.16.3.1"
+  floating_ip_cidr: "172.16.3.0/24"
+  floating_ip_start: "172.16.3.100"
+  floating_ip_end: "172.16.3.254"

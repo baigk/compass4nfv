@@ -21,6 +21,7 @@
   when: '"vlan_tag" in item'
   with_items: "{{ network_cfg['sys_intf_mappings'] }}"
 
+
 - name: set sys intf ip
   shell: ip addr del {{ item["ip"] }}/{{ item["netmask"] }} dev {{ item["alias"] }}; \
          ip addr add {{ item["ip"] }}/{{ item["netmask"] }} dev {{ item["alias"] }}; \

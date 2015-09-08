@@ -23,13 +23,13 @@ hosts:
     roles:
       - controller
       - ha
-  
+
   - name: host4
     mac: '64:3e:8c:4c:6b:7b'
     location: 17
     roles:
       - compute
-  
+
   - name: host5
     location: 18
     mac: '64:3e:8c:4c:68:2b'

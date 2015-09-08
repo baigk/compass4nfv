@@ -9,7 +9,7 @@ function tear_down_compass() {
     sudo umount $compass_vm_dir/new > /dev/null 2>&1
 
     sudo rm -rf $compass_vm_dir
-    
+
     log_info "tear_down_compass success!!!"
 }
 
@@ -48,12 +48,12 @@ function wait_ok() {
 function launch_compass() {
     local old_mnt=$compass_vm_dir/old
     local new_mnt=$compass_vm_dir/new
-    local old_iso=$WORK_DIR/iso/centos.iso 
-    local new_iso=$compass_vm_dir/centos.iso 
+    local old_iso=$WORK_DIR/iso/centos.iso
+    local new_iso=$compass_vm_dir/centos.iso
 
     log_info "launch_compass enter"
     tear_down_compass
-    
+
     set -e
     mkdir -p $compass_vm_dir $old_mnt
     sudo mount -o loop $old_iso $old_mnt
@@ -63,7 +63,7 @@ function launch_compass() {
 
     chmod 755 -R $new_mnt
     sed -i -e "s/REPLACE_MGMT_IP/$MGMT_IP/g" -e "s/REPLACE_MGMT_NETMASK/$MGMT_MASK/g" -e "s/REPLACE_INSTALL_IP/$COMPASS_SERVER/g" -e "s/REPLACE_INSTALL_NETMASK/$INSTALL_MASK/g" -e "s/REPLACE_GW/$MGMT_GW/g" $new_mnt/isolinux/isolinux.cfg
-   
+
     ssh-keygen -f $new_mnt/bootstrap/boot.rsa -t rsa -N ''
     cp $new_mnt/bootstrap/boot.rsa $rsa_file
 
@@ -71,9 +71,9 @@ function launch_compass() {
     sudo mkisofs -quiet -r -J -R -b isolinux/isolinux.bin  -no-emul-boot -boot-load-size 4 -boot-info-table -hide-rr-moved -x "lost+found:" -o $new_iso $new_mnt
 
     rm -rf $old_mnt $new_mnt
-    
+
     qemu-img create -f qcow2 $compass_vm_dir/disk.img 100G
-    
+
     # create vm xml
     sed -e "s/REPLACE_MEM/$COMPASS_VIRT_MEM/g" \
         -e "s/REPLACE_CPU/$COMPASS_VIRT_CPUS/g" \
@@ -83,10 +83,10 @@ function launch_compass() {
         -e "s/REPLACE_BRIDGE_INSTALL/br_install/g" \
         $COMPASS_DIR/deploy/template/vm/compass.xml \
         > $WORK_DIR/vm/compass/libvirt.xml
-    
+
     sudo virsh define $compass_vm_dir/libvirt.xml
     sudo virsh start compass
-    
+
     if ! wait_ok 300;then
         log_error "install os timeout"
         exit 1
@@ -96,7 +96,7 @@ function launch_compass() {
         log_error "install compass core failed"
         exit 1
     fi
-    
+
     set +e
     log_info "launch_compass exit"
 }

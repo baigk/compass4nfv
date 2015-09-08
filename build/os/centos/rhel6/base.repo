@@ -5,7 +5,7 @@
 # geographically close to the client.  You should use this for CentOS updates
 # unless you are manually picking other mirrors.
 #
-# If the mirrorlist= does not work for you, as a fall back you can try the 
+# If the mirrorlist= does not work for you, as a fall back you can try the
 # remarked out baseurl= line instead.
 #
 #
@@ -17,7 +17,7 @@ baseurl=http://mirrors.163.com/centos/$releasever/os/$basearch/
 gpgcheck=1
 gpgkey=http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-6
 
-#released updates 
+#released updates
 [updates]
 name=CentOS-$releasever - Updates - 163.com
 baseurl=http://mirrors.163.com/centos/$releasever/updates/$basearch/

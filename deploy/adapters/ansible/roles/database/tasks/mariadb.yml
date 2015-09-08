@@ -24,7 +24,7 @@
 - name: update wsrep_sst_rsync gid
   lineinfile: dest=/usr/bin/wsrep_sst_rsync state=absent regexp="\s*gid = \$MYGID$"  backup=yes
 
-- name: restart first mysql server 
+- name: restart first mysql server
   shell: service mysql restart --wsrep-cluster-address="gcomm://"
   when: inventory_hostname == haproxy_hosts.keys()[0]
   register: result
@@ -34,7 +34,7 @@
   tags:
     - mysql_restart
 
-- name: restart other mysql server 
+- name: restart other mysql server
   service: name=mysql state=restarted enabled=yes
   when: inventory_hostname != haproxy_hosts.keys()[0]
   register: result

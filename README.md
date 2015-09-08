@@ -10,7 +10,7 @@ There are two files in this directory:
 * **build**: build imaged-base installation ISO for OPNFV.
 * **deploy**: deploy OPNFV distributed system base the above ISO.
 
-## How to make a reposity for installation ISO 
+## How to make a reposity for installation ISO
 
 ## How to build a ISO for OPNFV installation
 

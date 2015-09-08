@@ -35,7 +35,7 @@ def get_packages_name_list(file_list, special_packages):
     return package_name_list
 
 def generate_download_script(root, arch, tmpl, docker_tmpl, default_packages, special_packages, special_packages_dir):
-    package_name_list = get_packages_name_list(get_file_list(root, arch), special_packages)
+    package_name_list = get_packages_name_list(get_file_list(root, arch), special_packages) if root else []
 
     tmpl = Template(file=tmpl, searchList={'packages':package_name_list, 'default_packages':default_packages})
     with open('work/repo/install_packages.sh', 'w') as f:

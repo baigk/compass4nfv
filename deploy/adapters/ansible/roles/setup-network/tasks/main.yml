@@ -1,11 +1,4 @@
 ---
-- name: setup sys intf
-  shell: ip link del {{ item["name"] }}; \
-         ip link add link {{ item["interface"] }} name {{ item["name"] }} type vlan id {{ item["vlan_tag"] }}; \
-         ip link set {{ item["interface"] }} up
-  when: '"vlan_tag" in item'
-  with_items: "{{ network_cfg['sys_intf_mappings'] }}"
-
 - name: add ovs bridge
   openvswitch_bridge: bridge={{ item["name"] }} state=present
   with_items: "{{ network_cfg['provider_net_mappings'] }}"
@@ -20,6 +13,14 @@
   shell: ip link set {{ item["interface"] }} up
   with_items: "{{ network_cfg['provider_net_mappings'] }}"
   when: 'item["type"] == "ovs"'
+
+- name: setup sys intf
+  shell: ip link del {{ item["name"] }}; \
+         ip link add link {{ item["interface"] }} name {{ item["name"] }} type vlan id {{ item["vlan_tag"] }}; \
+         ip link set {{ item["interface"] }} up
+  when: '"vlan_tag" in item'
+  with_items: "{{ network_cfg['sys_intf_mappings'] }}"
+
 
 - name: set sys intf ip
   shell: ip addr del {{ item["ip"] }}/{{ item["netmask"] }} dev {{ item["alias"] }}; \

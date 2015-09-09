@@ -1,27 +1,57 @@
 ---
 - name: create external net
-  shell: . /opt/admin-openrc.sh; \
-         neutron net-show ext-net || \
-         neutron net-create ext-net --router:external \
-                                    --provider:physical_network external \
-                                    --provider:network_type flat
-  run_once: yes
+  neutron_network:
+    login_username: ADMIN
+    login_password: "{{ ADMIN_PASS }}"
+    login_tenant_name: admin
+    auth_url: "http://{{ HA_VIP }}:35357/v2.0"
+    name: "{{ public_net_info.network }}"
+    provider_network_type: "{{ public_net_info.type }}"
+    provider_physical_network: "{{ public_net_info.provider_network }}"
+    provider_segmentation_id: "{{ public_net_info.segment_id}}"
+    shared: true
+    router_external: yes
+    state: present
+  run_once: true
+  when: 'public_net_info.enable == True'
 
 - name: create external subnet
-  shell: . /opt/admin-openrc.sh; \
-         neutron subnet-show ext-subnet || \
-         neutron subnet-create ext-net {{ EXTERNAL_NETWORK_CIDR }} --name ext-subnet \
-           --allocation-pool start={{ FLOATING_IP_START }},end={{  FLOATING_IP_END }} \
-           --disable-dhcp --gateway {{ EXTERNAL_NETWORK_GATEWAY }}
-  run_once: yes
+  neutron_subnet:
+    login_username: ADMIN
+    login_password: "{{ ADMIN_PASS }}"
+    login_tenant_name: admin
+    auth_url: "http://{{ HA_VIP }}:35357/v2.0"
+    name: "{{ public_net_info.subnet }}"
+    network_name: "{{ public_net_info.network }}"
+    cidr: "{{ public_net_info.floating_ip_cidr }}"
+    enable_dhcp: "{{ public_net_info.enable_dhcp }}"
+    no_gateway: "{{ public_net_info.no_gateway }}"
+    gateway_ip: "{{ public_net_info.external_gw }}"
+    allocation_pool_start: "{{ public_net_info.floating_ip_start }}"
+    allocation_pool_end: "{{ public_net_info.floating_ip_end }}"
+    state: present
+  run_once: true
+  when: 'public_net_info.enable == True'
 
 - name: create external router
-  shell: . /opt/admin-openrc.sh; \
-         neutron router-show router-ext || \
-         neutron router-create router-ext
-  run_once: yes
+  neutron_router:
+    login_username: ADMIN
+    login_password: "{{ ADMIN_PASS }}"
+    login_tenant_name: admin
+    auth_url: "http://{{ HA_VIP }}:35357/v2.0"
+    name: "{{ public_net_info.router }}"
+    state: present
+  run_once: true
+  when: 'public_net_info.enable == True'
 
 - name: set external router gateway
-  shell: . /opt/admin-openrc.sh; \
-         neutron router-gateway-set router-ext  ext-net
-  run_once: yes
+  neutron_router_gateway:
+    login_username: ADMIN
+    login_password: "{{ ADMIN_PASS }}"
+    login_tenant_name: admin
+    auth_url: "http://{{ HA_VIP }}:35357/v2.0"
+    router_name: "{{ public_net_info.router }}"
+    network_name: "{{ public_net_info.network }}"
+    state: present
+  run_once: true
+  when: 'public_net_info.enable == True'

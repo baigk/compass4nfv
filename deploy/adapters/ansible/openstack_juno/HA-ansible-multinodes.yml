@@ -42,12 +42,6 @@
   roles:
     - odl_cluster
 
-- hosts: controller
-  remote_user: root
-  sudo: True
-  roles:
-    - ext-network
-
 - hosts: all
   remote_user: root
   sudo: True
@@ -60,3 +54,9 @@
   sudo: True
   roles:
     - onos_cluster
+
+- hosts: controller
+  remote_user: root
+  sudo: True
+  roles:
+    - ext-network

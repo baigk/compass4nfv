@@ -39,6 +39,7 @@ ip_settings:
     gw: "172.16.3.1"
 
 public_net_info:
+  enable: False
   network: ext-net
   type: vlan
   segment_id: 1000

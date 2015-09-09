@@ -17,7 +17,7 @@ source ${COMPASS_DIR}/deploy/compass_vm.sh
 source ${COMPASS_DIR}/deploy/deploy_host.sh
 
 ######################### main process
-if false
+if true
 then
 if ! prepare_env;then
     echo "prepare_env failed"

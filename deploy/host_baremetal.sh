@@ -10,6 +10,6 @@ function get_host_macs() {
     echo "test: true" >> $config_file
     machine=`echo $HOST_MACS | sed -e 's/,/'\',\''/g' -e 's/^/'\''/g' -e 's/$/'\''/g'`
     echo "pxe_boot_macs: [$machine]" >> $config_file
-    
+
     echo $machine
 }

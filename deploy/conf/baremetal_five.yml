@@ -29,14 +29,14 @@ hosts:
     roles:
       - compute
       - storage
-  
+
   - name: host4
     mac: '11:22:33:44:55'
     ipmiIp: 192.168.2.100
     roles:
       - compute
       - storage
-  
+
   - name: host5
     mac: '11:22:33:44:55'
     ipmiIp: 192.168.2.100

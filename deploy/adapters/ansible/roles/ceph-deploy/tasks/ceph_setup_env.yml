@@ -13,8 +13,9 @@
 #- name: echo ceph source list
 #  shell: echo deb http://ceph.com/debian-dumpling/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
 
-- name: update and install ceph-deploy
-  shell: sudo apt-get install ceph-deploy
+#- name: update and install ceph-deploy
+#  shell: sudo apt-get install ceph-deploy
+- include_vars: "{{ ansible_os_family }}.yml"
 
 - name: copy rsa secret key from compass-core to host1
   copy: src=/root/.ssh/id_rsa dest=/root/.ssh/id_rsa mode=0600
@@ -48,12 +49,17 @@
 #  tags:
 #    - test_ceph_copy_sources
 
-- name: update and install dependency libs
-  shell: ssh -o StrictHostKeyChecking=no -t {{ item }} "apt-get install python-flask libgoogle-perftools4 libleveldb1 liblttng-ust0 libsnappy1 librbd1 librados2 python-ceph"
-  with_items:
-    - "{{ groups['all'] }}"
-  tags:
-    - install_ceph_libs
+#- name: update and install dependency libs
+#  shell: ssh -o StrictHostKeyChecking=no -t {{ item }} "apt-get install python-flask libgoogle-perftools4 libleveldb1 liblttng-ust0 libsnappy1 librbd1 librados2 python-ceph"
+#  with_items:
+#    - "{{ groups['all'] }}"
+#  tags:
+#    - install_ceph_libs
+
+- name: install ceph-related packages
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items: packages | union(packages_noarch)
+
 
 - name: mkdir for ceph-cluster
   file: path=~/ceph-cluster state=directory mode=0755

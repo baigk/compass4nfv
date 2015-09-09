@@ -18,6 +18,6 @@ for i in `seq $1`; do
     machines="${mac}"
   else
     machines="${machines} ${mac}"
-  fi 
+  fi
 done
 echo ${machines}

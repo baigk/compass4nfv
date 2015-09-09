@@ -17,7 +17,7 @@ source ${COMPASS_DIR}/deploy/compass_vm.sh
 source ${COMPASS_DIR}/deploy/deploy_host.sh
 
 ######################### main process
-if true
+if false
 then
 if ! prepare_env;then
     echo "prepare_env failed"
@@ -46,7 +46,7 @@ if ! launch_compass;then
 fi
 else
 # test code
-export machines="'00:00:01:c9:03:34','00:00:7c:8e:1e:c6','00:00:00:ec:6f:ca','00:00:7c:7a:91:cb','00:00:0e:82:79:08'"
+export machines="'00:00:53:a3:c6:54','00:00:13:05:b3:55','00:00:80:eb:c8:8c','00:00:45:0d:ed:ac','00:00:11:2e:56:43'"
 fi
 if [[ ! -z $VIRT_NUMBER ]];then
     if ! launch_host_vms;then

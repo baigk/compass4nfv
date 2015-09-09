@@ -1,3 +1,5 @@
 ---
+packages_noarch: []
+
 ceph_cluster_dir:
   - ~/ceph-cluster

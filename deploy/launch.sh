@@ -46,7 +46,7 @@ if ! launch_compass;then
 fi
 else
 # test code
-export machines="'00:00:16:42:da:3b','00:00:5f:73:b0:82','00:00:f1:5b:8e:81','00:00:f8:67:07:e6','00:00:53:fe:3e:98'"
+export machines="'00:00:53:a3:c6:54','00:00:13:05:b3:55','00:00:80:eb:c8:8c','00:00:45:0d:ed:ac','00:00:11:2e:56:43'"
 fi
 if [[ ! -z $VIRT_NUMBER ]];then
     if ! launch_host_vms;then

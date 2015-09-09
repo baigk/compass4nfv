@@ -9,6 +9,11 @@
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items: compute_packages | union(compute_packages_noarch)
 
+- name: Adjust Service Daemon
+  shell: >
+    sed -i '/neutron-plugin-openvswitch-agent/d' /opt/service ;
+    echo opendaylight >> /opt/service ;
+
 - name: shut down and disable Neutron's openvswitch  agent services
   service: name=neutron-plugin-openvswitch-agent state=stopped
 
@@ -34,10 +39,10 @@
     crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers opendaylight;
     crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vlan;
 
-- name: Adjust Service Daemon
-  shell: >
-    sed -i '/neutron-plugin-openvswitch-agent/d' /opt/service ;
-    echo opendaylight >> /opt/service ;
+#- name: Adjust Service Daemon
+#  shell: >
+#    sed -i '/neutron-plugin-openvswitch-agent/d' /opt/service ;
+#    echo opendaylight >> /opt/service ;
 
 - name: Create ML2 Configuration File
   template:

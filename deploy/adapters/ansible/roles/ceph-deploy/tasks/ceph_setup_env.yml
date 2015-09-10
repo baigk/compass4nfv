@@ -23,18 +23,13 @@
 - name: copy rsa pub key from compass-core to host1
   copy: src=/root/.ssh/id_rsa.pub dest=/root/.ssh/id_rsa.pub mode=0644
 
-#- name: gen ssh key for no-ask access to every nodes
-#  shell: if [ ! -f ~/.ssh/id_rsa.pub ]; then ssh-keygen -q -t rsa -f ~/.ssh/id_rsa -N ""; else echo "already gen ssh key!"; fi;
+- name: gen ssh key for no-ask access to every nodes
+  shell: if [ ! -f ~/.ssh/id_rsa.pub ]; then ssh-keygen -q -t rsa -f ~/.ssh/id_rsa -N ""; else echo "already gen ssh key!"; fi;
 
-#- name: copy key to node
-#  shell: ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no root@{{ item }}
-#  with_items:
-#    - host1
-#    - host2
-#    - host3
-#    - host4
-#    - host5
-
+- name: copy key to node
+  shell: ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no root@{{ item }}
+  with_items:
+    - "{{ groups['all'] }}"
 #- name: create source list from template
 #  template: src=sources_aliyun.list dest=~/sources.list mode=0755
 

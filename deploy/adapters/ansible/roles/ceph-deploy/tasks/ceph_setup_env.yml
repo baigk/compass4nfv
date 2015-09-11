@@ -1,20 +1,4 @@
 ---
-# for centos
-#- name: add ceph repo
-#  template: src=ceph.repo dest=/etc/yum.repos.d/ceph.repo mode=0755
-
-# for centos
-#- name: update and install ceph-deploy
-#  shell:  sudo yum update && sudo yum -y install ceph-deploy
-
-#- name: update ceph repo
-#  shell: wget -q -O- 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc' | sudo apt-key add -
-
-#- name: echo ceph source list
-#  shell: echo deb http://ceph.com/debian-dumpling/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
-
-#- name: update and install ceph-deploy
-#  shell: sudo apt-get install ceph-deploy
 - include_vars: "{{ ansible_os_family }}.yml"
 
 - name: copy rsa secret key from compass-core to host1
@@ -30,31 +14,38 @@
   shell: ssh-copy-id -i ~/.ssh/id_rsa.pub -o StrictHostKeyChecking=no root@{{ item }}
   with_items:
     - "{{ groups['all'] }}"
-#- name: create source list from template
-#  template: src=sources_aliyun.list dest=~/sources.list mode=0755
-
-#- name: update host source list
-#  shell: cp -f ~/sources.list /etc/apt/sources.list
-  #shell: if [ ! `cat /etc/apt/sources.list |awk '/archive.ubuntu.com/{print $2}' | uniq` ]; then cat ~/sources.list >> /etc/apt/sources.list; else echo "already update sources.list"; fi;
-
-#- name: copy sources.list to all hosts
-#  shell: scp -o StrictHostKeyChecking=no /etc/apt/sources.list {{ item }}:/etc/apt/sources.list
-#  with_items:
-#    - "{{ groups['all'] }}"
-#  tags:
-#    - test_ceph_copy_sources
-
-#- name: update and install dependency libs
-#  shell: ssh -o StrictHostKeyChecking=no -t {{ item }} "apt-get install python-flask libgoogle-perftools4 libleveldb1 liblttng-ust0 libsnappy1 librbd1 librados2 python-ceph"
-#  with_items:
-#    - "{{ groups['all'] }}"
-#  tags:
-#    - install_ceph_libs
 
 - name: install ceph-related packages
   action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
   with_items: packages | union(packages_noarch)
 
+- name: clear cluster_hosts_name
+  file: path=cluster_hosts_name state=absent
+  tags:
+    - create_ceph_cluster
+    - ceph_install
+
+- name: echo hosts name to file
+  shell: echo -n "{{ item }} " >> cluster_hosts_name
+  with_items:
+    - "{{ groups['all'] }}"
+  tags:
+    - create_ceph_cluster
+    - ceph_install
+
+- name: register hosts name
+  shell: cat cluster_hosts_name
+  register: ceph_cluster_hosts
+  tags:
+    - create_ceph_cluster
+    - echo_hosts
+    - ceph_install
+
+- name: gen clean ceph script
+  template: src=clean_ceph.j2 dest=~/clean_ceph.sh mode=0777
+
+- name: clean ceph data of last deploy 
+  shell: ~/clean_ceph.sh 
 
 - name: mkdir for ceph-cluster
-  file: path=~/ceph-cluster state=directory mode=0755
+  file: path={{ ceph_cluster_dir[0] }} state=directory mode=0755

@@ -4,7 +4,8 @@
   tags:
     - ceph_deploy 
     - ceph_setup_env
-
+    - ceph_install
+ 
 - include: ceph_install.yml
   when: inventory_hostname == "{{ groups['controller'][0] }}"
   tags:

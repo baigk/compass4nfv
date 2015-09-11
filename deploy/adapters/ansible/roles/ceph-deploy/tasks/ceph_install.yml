@@ -1,23 +1,4 @@
 ---
-- name: clear cluster_hosts_name
-  file: path=cluster_hosts_name state=absent
-  tags:
-    - create_ceph_cluster
-
-- name: echo hosts name to file
-  shell: echo -n "{{ item }} " >> cluster_hosts_name
-  with_items:
-    - "{{ groups['all'] }}"
-  tags:
-    - create_ceph_cluster
-
-- name: register hosts name
-  shell: cat cluster_hosts_name
-  register: ceph_cluster_hosts
-  tags:
-    - create_ceph_cluster
-    - echo_hosts
-
 - name: create ceph cluster
   shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy new {{ ceph_cluster_hosts.stdout_lines[0] }}
   tags:
@@ -49,7 +30,7 @@
     - create_osd
 
 - name: prepare create osd
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy --overwrite-conf osd prepare {{ item }}:/var/local/osd
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd prepare {{ item }}:/var/local/osd
   with_items:
     - "{{ groups['controller'] }}"
   tags:
@@ -57,11 +38,12 @@
 
 
 - name: activate osd
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd activate {{ item }}:/var/local/osd
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd activate {{ item }}:/var/local/osd && ceph-deploy osd activate {{ item }}:/var/local/osd
   with_items:
     - "{{ groups['controller'] }}"
   tags:
     - create_osd
+    - activate_osd
 
 - name: create admin node
   shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy admin {{ ceph_cluster_hosts.stdout_lines[0] }}

@@ -1,10 +1,10 @@
-{ "ipPrefix": "10.1.0.*",
+{ "ipPrefix": "{{ ip_settings[groups['onos'][0]]['mgmt']['cidr'] }}",
   "nodes":[
 {% for host in groups['onos'] %}
     {% if loop.last %}
-	        { "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}", "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}", "tcpPort": 9876 }
+	        { "id": "{{ ip_settings[host]['mgmt']['ip'] }}", "ip": "{{ ip_settings[host]['mgmt']['ip'] }}", "tcpPort": 9876 }
     {% else %}
-                { "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}", "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}", "tcpPort": 9876 },
+                { "id": "{{ ip_settings[host]['mgmt']['ip'] }}", "ip": "{{ ip_settings[host]['mgmt']['ip'] }}", "tcpPort": 9876 },
     {% endif %}
 {% endfor %}
 ]}

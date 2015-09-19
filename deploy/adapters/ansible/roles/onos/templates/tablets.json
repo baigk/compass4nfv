@@ -3,14 +3,14 @@
 {% for host in groups['onos'] %}
     {% if loop.last %}
 	    {
-            "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
-            "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
+            "ip": "{{ ip_settings[host]['mgmt']['ip'] }}",
+            "id": "{{ ip_settings[host]['mgmt']['ip'] }}",
             "tcpPort": 9876
         }
     {% else %}
         {
-            "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
-            "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
+            "ip": "{{ ip_settings[host]['mgmt']['ip'] }}",
+            "id": "{{ ip_settings[host]['mgmt']['ip'] }}",
             "tcpPort": 9876
         },
     {% endif %}
@@ -24,14 +24,14 @@
 		{% for host in groups['onos'] %}
 		    {% if loop.last %}
 	    {
-            "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
-            "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
+            "ip": "{{ ip_settings[host]['mgmt']['ip'] }}",
+            "id": "{{ ip_settings[host]['mgmt']['ip'] }}",
             "tcpPort": 9876
         }
             {% else %}
         {
-            "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
-            "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
+            "ip": "{{ ip_settings[host]['mgmt']['ip'] }}",
+            "id": "{{ ip_settings[host]['mgmt']['ip'] }}",
             "tcpPort": 9876
         },
             {% endif %}
@@ -43,14 +43,14 @@
 		{% for host in groups['onos'] %}
 		    {% if loop.last %}
 	    {
-            "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
-            "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
+            "ip": "{{ ip_settings[host]['mgmt']['ip'] }}",
+            "id": "{{ ip_settings[host]['mgmt']['ip'] }}",
             "tcpPort": 9876
         }
             {% else %}
         {
-            "ip": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
-            "id": "{{ hostvars[host]['ansible_' + INTERNAL_INTERFACE].ipv4.address }}",
+            "ip": "{{ ip_settings[host]['mgmt']['ip'] }}",
+            "id": "{{ ip_settings[host]['mgmt']['ip'] }}",
             "tcpPort": 9876
         },
             {% endif %}

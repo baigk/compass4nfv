@@ -53,6 +53,7 @@ def setup_ips(ip_settings, sys_intf_mappings):
             intf_name = intf_info["name"]
         else:
             intf_name = intf_info["alias"]
+
         cmd = "ip addr add %s/%s brd %s dev %s;" \
               % (intf_info["ip"], intf_info["netmask"], str(network.broadcast),intf_name)
         if "gw" in intf_info:

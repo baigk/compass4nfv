@@ -9,9 +9,6 @@
   shell: echo {{ item }} >> /opt/service
   with_items: services | union(services_noarch)
 
-- name: install pexpect
-  pip: name=pexpect state=present extra_args='--pre'
-
 - name: activate ip_nonlocal_bind
   sysctl: name=net.ipv4.ip_nonlocal_bind value=1
           state=present reload=yes
@@ -82,5 +79,5 @@
   template: src=keepalived.conf dest=/etc/keepalived/keepalived.conf
   notify: restart keepalived
 
-- name: restart rsyslog
-  shell: service rsyslog restart
+- name: restart rsyslog 
+  service: name=rsyslog state=restarted enabled=yes

@@ -44,8 +44,8 @@
 - name: gen clean ceph script
   template: src=clean_ceph.j2 dest=~/clean_ceph.sh mode=0777
 
-- name: clean ceph data of last deploy 
-  shell: ~/clean_ceph.sh 
+- name: clean ceph data of last deploy
+  shell: ~/clean_ceph.sh
 
 - name: mkdir for ceph-cluster
   file: path={{ ceph_cluster_dir[0] }} state=directory mode=0755

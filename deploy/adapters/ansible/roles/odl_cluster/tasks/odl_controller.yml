@@ -10,10 +10,10 @@
 
 - name: download oracle-jdk8 package file
   get_url: url="http://{{ http_server.stdout_lines[0] }}/packages/onos/{{ jdk8_pkg_name }}"  dest=/opt/{{ jdk8_pkg_name }}
-  
+
 - name: upload install_jdk8 scripts
   unarchive: src=install_jdk8.tar dest=/opt/
-  
+
 - name: install install_jdk8 package
   command: su -s /bin/sh -c "/opt/install_jdk8/install_jdk8.sh"
 
@@ -29,7 +29,7 @@
 #    group: root
 #    owner: root
 #    mode: 0755
- 
+
 - name: create odl group
   group: name=odl system=yes state=present
 
@@ -61,7 +61,7 @@
     - restart odl service
 
 - name: opendaylight system file
-  template: 
+  template:
     src: "{{ service_file.src }}"
     dest: "{{ service_file.dst }}"
     mode: 0644

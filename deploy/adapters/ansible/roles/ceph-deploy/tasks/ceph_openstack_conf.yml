@@ -19,4 +19,4 @@
   with_items:
     - "{{ groups['compute'] }}"
   tags:
-    - ceph_conf_nova 
+    - ceph_conf_nova

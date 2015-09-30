@@ -8,27 +8,66 @@ function destroy_bridge()
 {
     bridge=$1
     nic=$2
-    ips=$(ip addr show $bridge | grep 'inet ' | awk -F' ' '{print $2}')
+    ip="$3"
+
+    brige_info=$(ip addr show $bridge 2>/dev/null)
+    if [[ -z $brige_info ]]; then
+        return
+    fi
+
+    if [[ -n $ip ]]; then
+        ip addr delete $ip dev $bridge | true
+    fi
+
+    ips=`echo "$brige_info" | grep 'inet ' | sed  "s/inet //g"`
+
     routes=$(ip route show | grep $bridge)
 
     ip link set $bridge down
 
     brctl delbr $bridge
 
-    for ip in $ips; do
-        ip addr add $ip dev $nic
-    done
+    if [[ -n $ips ]]; then
+        echo "$ips" | while read line; do
+            echo $line | sed "s/$bridge/dev $nic/g" | xargs ip addr add | true
+        done
+    fi
 
-    echo "$routes" | while read line; do
-        echo $line | sed "s/$bridge/$nic/g" | xargs ip route add | true
+    if [[ -n $routes ]]; then
+        echo "$routes" | while read line; do
+            echo $line | sed "s/$bridge/$nic/g" | xargs ip route add | true
+        done
+    fi
+}
+
+function get_broadcast_addr()
+{
+    ip=(${1//[!0-9]/ })
+    mask=(${2//[!0-9]/ })
+
+    for i in {0..3}; do
+        num=$((${ip[$i]} | $((${mask[$i]} ^ 255))))
+        if [[ -z $broadcast ]]; then
+            broadcast="$num"
+        else
+            broadcast="$broadcast.$num"
+        fi
     done
+    echo ${broadcast}
+}
+
+function get_mask_len()
+{
+    mask=`echo $1 | awk -F'.' '{print ($1*(2^24)+$2*(2^16)+$3*(2^8)+$4)}'`
+    mask_len=`echo "obase=2;${mask}"|bc|awk -F'0' '{print length($1)}'`
+    echo $mask_len
 }
 
 function create_bridge()
 {
     bridge=$1
     nic=$2
-    ips=$(ip addr show $nic | grep 'inet ' | awk -F' ' '{print $2}')
+    ips=$(ip addr show $nic | grep 'inet ' | sed "s/inet //g")
     routes=$(ip route show | grep $nic)
 
     ip addr flush $nic
@@ -37,25 +76,47 @@ function create_bridge()
     brctl addif $bridge $nic
     ip link set $bridge up
 
-    for ip in $ips; do
-        ip addr add $ip dev $bridge
-    done
+    if [[ -n $ips ]]; then
+        echo "$ips" | while read line; do
+            echo $line | sed -e "s/$nic/dev $bridge/g" | xargs ip addr add
+        done
+    fi
 
-    mask=`echo $INSTALL_MASK | awk -F'.' '{print ($1*(2^24)+$2*(2^16)+$3*(2^8)+$4)}'`
-    mask_len=`echo "obase=2;${mask}"|bc|awk -F'0' '{print length($1)}'`
-    ip addr add $INSTALL_GW/$mask_len dev $bridge
+    mask_len=`get_mask_len $INSTALL_MASK`
+    broadcast=`get_broadcast_addr $INSTALL_GW $INSTALL_MASK`
+    ip addr add $INSTALL_GW/$mask_len brd $broadcast dev $bridge
 
-    echo "$routes" | while read line; do
-        echo $line | sed "s/$nic/$bridge/g" | xargs ip route add | true
-    done
+    if [[ -n $routes ]]; then
+        echo "$routes" | while read line; do
+            echo $line | sed "s/$nic/$bridge/g" | xargs ip route add | true
+        done
+    fi
 }
 
-function setup_om_bridge() {
-    destroy_bridge br_install $OM_NIC
-    create_bridge br_install $OM_NIC
+function setup_install_bridge() {
+    destroy_bridge br_install $INSTALL_NIC $INSTALL_GW
+    create_bridge br_install $INSTALL_NIC
 }
 
-function setup_om_nat() {
+
+function setup_om_net() {
+    if [[ -z `brctl show br_om 2>/dev/null` ]]; then
+        brctl addbr br_om
+    fi
+
+    if [[ -z $COMPASS_OM_IP ]]; then
+        return
+    fi
+
+    if [[ $TYPE == baremetal && $COMPASS_OM_NIC == $INSTALL_NIC ]]; then
+        return
+    fi
+
+    destroy_bridge br_om $COMPASS_OM_NIC ""
+    create_bridge br_om $COMPASS_OM_NIC
+}
+
+function setup_install_nat() {
     destroy_nat install
     # create install network
     sed -e "s/REPLACE_BRIDGE/br_install/g" \
@@ -88,9 +149,12 @@ function create_nets() {
 
     # create install network
     if [[ ! -z $VIRT_NUMBER ]];then
-        setup_om_nat
+        setup_install_nat
     else
-        setup_om_bridge
+        setup_install_bridge
     fi
+
+    # create om network
+    setup_om_net
 }
 

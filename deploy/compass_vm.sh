@@ -28,6 +28,7 @@ function install_compass_core() {
 }
 
 function wait_ok() {
+    set +x
     log_info "wait_compass_ok enter"
     retry=0
     until timeout 1s ssh $ssh_args root@$MGMT_IP "exit" >/dev/null 2>&1
@@ -40,7 +41,7 @@ function wait_ok() {
             exit 1
         fi
     done
-
+    set -x
     log_warn "os install time used: 100%"
     log_info "wait_compass_ok exit"
 }
@@ -62,7 +63,23 @@ function launch_compass() {
     sudo umount $old_mnt
 
     chmod 755 -R $new_mnt
-    sed -i -e "s/REPLACE_MGMT_IP/$MGMT_IP/g" -e "s/REPLACE_MGMT_NETMASK/$MGMT_MASK/g" -e "s/REPLACE_INSTALL_IP/$COMPASS_SERVER/g" -e "s/REPLACE_INSTALL_NETMASK/$INSTALL_MASK/g" -e "s/REPLACE_GW/$MGMT_GW/g" $new_mnt/isolinux/isolinux.cfg
+
+    if [[ $COMPASS_OM_NIC == $INSTALL_NIC ]]; then
+        local shared=true
+    else
+        local shared=false
+    fi
+   
+    sed -i -e "s/REPLACE_MGMT_IP/$MGMT_IP/g" \
+           -e "s/REPLACE_MGMT_NETMASK/$MGMT_MASK/g" \
+           -e "s/REPLACE_GW/$MGMT_GW/g" \
+           -e "s/REPLACE_INSTALL_IP/$COMPASS_SERVER/g" \
+           -e "s/REPLACE_INSTALL_NETMASK/$INSTALL_MASK/g" \
+           -e "s/REPLACE_COMPASS_OM_NETMASK/$COMPASS_OM_MASK/g" \
+           -e "s/REPLACE_COMPASS_OM_IP/$COMPASS_OM_IP/g" \
+           -e "s/REPLACE_COMPASS_OM_GW/$COMPASS_OM_GW/g" \
+           -e "s/REPLACE_COMPASS_OM_SHARED_NIC/$shared/g" \
+           $new_mnt/isolinux/isolinux.cfg
 
     ssh-keygen -f $new_mnt/bootstrap/boot.rsa -t rsa -N ''
     cp $new_mnt/bootstrap/boot.rsa $rsa_file
@@ -81,6 +98,7 @@ function launch_compass() {
         -e "s#REPLACE_ISO#$compass_vm_dir/centos.iso#g" \
         -e "s/REPLACE_NET_MGMT/mgmt/g" \
         -e "s/REPLACE_BRIDGE_INSTALL/br_install/g" \
+        -e "s/REPLACE_BRIDGE_OM/br_om/g" \
         $COMPASS_DIR/deploy/template/vm/compass.xml \
         > $WORK_DIR/vm/compass/libvirt.xml
 

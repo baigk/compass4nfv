@@ -122,6 +122,7 @@
   shell: >
     crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 mechanism_drivers onos;
     crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 tenant_network_types vxlan;
+    crudini --set /etc/neutron/plugins/ml2/ml2_conf.ini ml2 type_drivers vxlan
 
 - name: Create ML2 Configuration File
   template:
@@ -141,4 +142,4 @@
     su -s /bin/sh -c "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head" neutron;
 
 - name: Restart neutron-server
-  service: name=neutron-server state=started
+  service: name=neutron-server state=restarted

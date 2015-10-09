@@ -17,17 +17,24 @@ dd if=/dev/zero of=/ceph/images/ceph-volumes.img bs=1M seek=12288 count=0 oflag=
 sgdisk -g --clear /ceph/images/ceph-volumes.img
 fi
 
+#safe check
+ps -ef |grep create_osd.sh |awk '{print $2}' |xargs kill -9
+ps -ef |grep lvremove |awk '{print $2}' |xargs kill -9
+ps -ef |grep vgremove |awk '{print $2}' |xargs kill -9
+ps -ef |grep vgcreate |awk '{print $2}' |xargs kill -9
+ps -ef |grep lvcreate |awk '{print $2}' |xargs kill -9
+
 if [ -L "/dev/ceph-volumes/ceph0" ]; then
 echo "remove lv vg"
-lvremove /dev/ceph-volumes/ceph0
-vgremove ceph-volumes
+lvremove -f /dev/ceph-volumes/ceph0
+vgremove -f ceph-volumes
 rm -r /dev/ceph-volumes
 fi
 
 losetup -d /dev/loop0
 
 echo "vgcreate"
-vgcreate ceph-volumes $(sudo losetup --show -f /ceph/images/ceph-volumes.img)
+vgcreate -y ceph-volumes $(sudo losetup --show -f /ceph/images/ceph-volumes.img)
 echo "lvcreate"
 sudo lvcreate -L9G -nceph0 ceph-volumes
 echo "mkfs"

@@ -25,6 +25,6 @@ function deploy_host(){
     --host_roles="${HOST_ROLES}" --default_roles="${DEFAULT_ROLES}" --switch_ips="${SWITCH_IPS}" \
     --machines=${machines//\'} --switch_credential="${SWITCH_CREDENTIAL}" \
     --deployment_timeout="${DEPLOYMENT_TIMEOUT}" --${POLL_SWITCHES_FLAG} --dashboard_url="${DASHBOARD_URL}" \
-    --cluster_vip="${VIP}" --network_cfg="$NETWORK_FILE" --neutron_cfg="$NEUTRON_FILE"
+    --cluster_vip="${VIP}" --network_cfg="$NETWORK_FILE" --neutron_cfg="$NEUTRON_FILE" --ceph_disk="$CEPH_DISK"
 
 }

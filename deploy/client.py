@@ -700,6 +700,9 @@ class CompassClient(object):
         if CONF.cluster_vip:
             package_config["ha_proxy"]["vip"] = CONF.cluster_vip
 
+        if CONF.ceph_disk:
+            package_config["ceph_disk"] = CONF.ceph_disk
+
         status, resp = self.client.update_cluster_config(
             cluster_id, package_config=package_config)
         LOG.info(

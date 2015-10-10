@@ -9,7 +9,7 @@ if [ ! -d "/ceph/images" ]; then
 mkdir -p /ceph/images
 fi
 
-rm /ceph/images/ceph-volumes.img
+rm -f /ceph/images/ceph-volumes.img
 
 if [ ! -f "/ceph/images/ceph-volumes.img" ]; then
 echo "create ceph-volumes.img"
@@ -18,7 +18,6 @@ sgdisk -g --clear /ceph/images/ceph-volumes.img
 fi
 
 #safe check
-ps -ef |grep create_osd.sh |awk '{print $2}' |xargs kill -9
 ps -ef |grep lvremove |awk '{print $2}' |xargs kill -9
 ps -ef |grep vgremove |awk '{print $2}' |xargs kill -9
 ps -ef |grep vgcreate |awk '{print $2}' |xargs kill -9
@@ -34,9 +33,9 @@ fi
 losetup -d /dev/loop0
 
 echo "vgcreate"
-vgcreate -y ceph-volumes $(sudo losetup --show -f /ceph/images/ceph-volumes.img)
+vgcreate -y ceph-volumes $(losetup --show -f /ceph/images/ceph-volumes.img)
 echo "lvcreate"
-sudo lvcreate -L9G -nceph0 ceph-volumes
+lvcreate -L9G -nceph0 ceph-volumes
 echo "mkfs"
 mkfs.xfs -f /dev/ceph-volumes/ceph0
 

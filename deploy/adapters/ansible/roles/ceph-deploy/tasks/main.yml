@@ -12,6 +12,7 @@
     - ceph_deploy
     - ceph_install
 
+
 - include: ceph_install_RedHat.yml
   when: inventory_hostname == groups['controller'][0] and ansible_os_family == "RedHat"
   tags:

@@ -4,11 +4,24 @@
   tags:
     - create_ceph_cluster
 
-- name: install ceph for every nodes includes jumpserver
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy install --no-adjust-repos --repo-url http://10.1.0.12/cblr/repo_mirror/centos7-juno-ppa --gpg-url http://10.1.0.12/cblr/repo_mirror/centos7-juno-ppa/ceph_key_release.asc {{ ceph_cluster_hosts.stdout_lines[0]}}
+- name: install ceph-mon for every nodes includes jumpserver
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy install --mon {{ ceph_cluster_hosts.stdout_lines[0]}}
 
-- name: create monitor node in controller group
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy --overwrite-conf mon create-initial
+- name: install ceph-osd for controller node
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy install --osd {{ item }}
+  with_items:
+    - "{{ groups['controller'] }}"
+
+- name: create monitor node
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy mon create-initial
+  ignore_errors: True
+
+- name: sleep for monitor node
+  shell: sleep 20
+
+- name: create monitor node again for double check
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy mon create-initial 
+  ignore_errors: True
 
 - name: copy create_osd.sh to host1
   copy: src=create_osd.sh dest=~/create_osd.sh mode=0777
@@ -22,15 +35,16 @@
   tags:
     - create_osd
 
-- name: create osd
+- name: exec create osd storage shell
   shell: ssh -o StrictHostKeyChecking=no -t {{ item }} "~/create_osd.sh"
   with_items:
     - "{{ groups['controller'] }}"
   tags:
     - create_osd
+  ignore_errors: True
 
 - name: prepare create osd
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy --repo-url http://10.1.0.12/cblr/repo_mirror/centos7-juno-ppa --gpg-url http://10.1.0.12/cblr/repo_mirror/centos7-juno-ppa/ceph_key_release.asc osd prepare {{ item }}:/var/local/osd
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd prepare {{ item }}:/var/local/osd
   with_items:
     - "{{ groups['controller'] }}"
   tags:
@@ -38,7 +52,7 @@
 
 
 - name: activate osd
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy --repo-url http://10.1.0.12/cblr/repo_mirror/centos7-juno-ppa --gpg-url http://10.1.0.12/cblr/repo_mirror/centos7-juno-ppa/ceph_key_release.asc osd activate {{ item }}:/var/local/osd
+  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd activate {{ item }}:/var/local/osd
   with_items:
     - "{{ groups['controller'] }}"
   tags:

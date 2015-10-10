@@ -15,4 +15,10 @@ packages:
   - ceph-fs-common
   - gdisk
 
-services: []
+services:
+  - cinder-volume
+
+
+cinder_service: cinder-volume
+nova_service: nova-compute
+

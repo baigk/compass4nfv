@@ -3,4 +3,8 @@ packages:
   - ceph-deploy
   - ceph
 
-services: []
+services:
+  - openstack-cinder-volume
+
+cinder_service: openstacck-cinder-volume
+nova_service: openstack-nova-compute

@@ -11,9 +11,9 @@ fi
 
 rm -f /ceph/images/ceph-volumes.img
 
-if [ ! -f "/ceph/images/ceph-volumes.img" ]; then
+if [ ! "/ceph/images/ceph-volumes.img" ]; then
 echo "create ceph-volumes.img"
-dd if=/dev/zero of=/ceph/images/ceph-volumes.img bs=1M seek=12288 count=0 oflag=direct
+dd if=/dev/zero of=/ceph/images/ceph-volumes.img bs=1 seek=$(df / | awk '$3 ~ /[0-9]+/ { print $4 }') count=0 oflag=direct
 sgdisk -g --clear /ceph/images/ceph-volumes.img
 fi
 

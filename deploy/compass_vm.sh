@@ -17,6 +17,17 @@ function install_compass_core() {
     local inventory_file=$compass_vm_dir/inventory.file
     log_info "install_compass_core enter"
     sed -i "s/mgmt_next_ip:.*/mgmt_next_ip: ${COMPASS_SERVER}/g" $WORK_DIR/installer/compass-install/install/group_vars/all
+
+    if [[ -n $OS_DIR ]]; then
+        ssh $ssh_args root@$MGMT_IP mkdir -p /var/cobbler/redhat/iso/
+        scp  $ssh_args $OS_DIR/*.iso root@$MGMT_IP:/var/cobbler/redhat/iso/
+    fi
+
+    if [[ -n $REPO_DIR ]]; then
+        ssh $ssh_args root@$MGMT_IP mkdir -p /var/cobbler/redhat/ppa/
+        scp $ssh_args $REPO_DIR/*.tar.gz root@$MGMT_IP:/var/cobbler/redhat/ppa/
+    fi
+
     echo "compass_nodocker ansible_ssh_host=$MGMT_IP ansible_ssh_port=22" > $inventory_file
     PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=60s' python /usr/local/bin/ansible-playbook -e pipeline=true --private-key=$rsa_file --user=root --connection=ssh --inventory-file=$inventory_file $WORK_DIR/installer/compass-install/install/compass_nodocker.yml
     exit_status=$?

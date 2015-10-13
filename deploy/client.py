@@ -219,6 +219,9 @@ opts = [
     cfg.StrOpt('ceph_disk',
               help='ceph disk',
               default=''),
+    cfg.StrOpt('deploy_type',
+              help='deploy type',
+              default='virtual'),
 ]
 CONF.register_cli_opts(opts)
 
@@ -421,6 +424,7 @@ class CompassClient(object):
         https_proxy = CONF.https_proxy
         local_repo_url = CONF.local_repo_url
         repo_name = CONF.repo_name
+        deploy_type = CONF.deploy_type
         if not https_proxy and http_proxy:
             https_proxy = http_proxy
 
@@ -482,6 +486,8 @@ class CompassClient(object):
             general_config['local_repo'] = local_repo_url
         if repo_name:
             general_config['repo_name'] = repo_name
+        if deploy_type:
+            general_config['deploy_type'] = deploy_type
 
         os_config["general"] = general_config
 

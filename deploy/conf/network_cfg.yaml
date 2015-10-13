@@ -4,7 +4,7 @@ bond_mappings: []
 provider_net_mappings:
   - name: br-prv
     network: physnet
-    interface: eth1
+    interface: eno2
     type: ovs
     role:
       - controller
@@ -12,7 +12,7 @@ provider_net_mappings:
 
 sys_intf_mappings:
   - name: mgmt
-    interface: eth1
+    interface: eno2
     vlan_tag: 101
     type: vlan
     role:
@@ -20,7 +20,7 @@ sys_intf_mappings:
       - compute
 
   - name: storage
-    interface: eth1
+    interface: eno2
     vlan_tag: 102
     type: vlan
     role:
@@ -55,21 +55,21 @@ ip_settings:
 
   - name: external
     ip_ranges:
-    - - "192.168.50.210"
-      - "192.168.50.220"
-    cidr: "192.168.50.0/24"
-    gw: "192.168.50.1"
+    - - "172.29.24.180"
+      - "172.29.24.189"
+    cidr: "172.29.24.0/24"
+    gw: "172.29.24.254"
     role:
       - controller
       - compute
 
 internal_vip:
-  ip: 172.16.1.222
+  ip: 172.16.1.179
   netmask: "24"
   interface: mgmt
 
 public_vip:
-  ip: 192.168.50.240
+  ip: 172.29.24.179
   netmask: "24"
   interface: external
 
@@ -83,7 +83,7 @@ public_net_info:
   router: router-ext
   enable_dhcp: False
   no_gateway: False
-  external_gw: "192.168.50.1"
-  floating_ip_cidr: "192.168.50.0/24"
-  floating_ip_start: "192.168.50.221"
-  floating_ip_end: "192.168.50.231"
+  external_gw: "172.29.24.254"
+  floating_ip_cidr: "172.29.24.0/24"
+  floating_ip_start: "172.29.24.190"
+  floating_ip_end: "172.29.24.199"

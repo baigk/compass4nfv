@@ -21,7 +21,7 @@ exit 1
 #set ipmiUser=$host.get('ipmiUser', $default_ipmiUser)
 #set ipmiPass=$host.get('ipmiPass', $default_ipmiPass)
 for i in {1..5}; do
-    if ipmitool -I lan -H $ipmiIp -U $ipmiUser -P $ipmiPass chassis bootdev pxe >/dev/null 2>&1
+    if ipmitool -I lanplus -H $ipmiIp -U $ipmiUser -P $ipmiPass chassis bootdev pxe >/dev/null 2>&1
     then
         break
     elif [[ i -lt 5 ]]
@@ -34,7 +34,7 @@ for i in {1..5}; do
 done
 sleep 1
 for i in {1..5}; do
-    if ipmitool -I lan -H $ipmiIp -U $ipmiUser -P $ipmiPass chassis power reset >/dev/null 2>&1
+    if ipmitool -I lanplus -H $ipmiIp -U $ipmiUser -P $ipmiPass chassis power reset >/dev/null 2>&1
     then
         break
     elif [[ i -lt 5 ]]

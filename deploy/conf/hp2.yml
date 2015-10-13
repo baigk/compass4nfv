@@ -7,7 +7,7 @@ ipmiUser: Administrator
 
 hosts:
   - name: host1
-    mac: 'C4:34:6B:C7:55:8C'
+    mac: 'C4:34:6B:C7:55:88'
     ipmiPass: '75169715'
     ipmiIp: 172.25.14.122
     roles:
@@ -16,7 +16,7 @@ hosts:
       - compute
 
   - name: host2
-    mac: 'C4:34:6B:C7:68:BC'
+    mac: 'C4:34:6B:C7:68:B8'
     ipmiPass: '14241782'
     ipmiIp: 172.25.14.123
     roles:
@@ -25,7 +25,7 @@ hosts:
       - compute
   
   - name: host3
-    mac: 'C4:34:6B:C7:76:B4'
+    mac: 'C4:34:6B:C7:76:B0'
     ipmiPass: '03164278'
     ipmiIp: 172.25.14.124
     roles:
@@ -34,14 +34,14 @@ hosts:
       - compute
 
   - name: host4
-    mac: 'C4:34:6B:C7:E4:9C'
+    mac: 'C4:34:6B:C7:E4:98'
     ipmiPass: '68547271'
     ipmiIp: 172.25.14.125
     roles:
       - compute
 
   - name: host5
-    mac: 'C4:34:6B:C7:74:2C'
+    mac: 'C4:34:6B:C7:74:28'
     ipmiPass: '81623537'
     ipmiIp: 172.25.14.126
     roles:

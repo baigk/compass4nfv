@@ -1,0 +1,48 @@
+
+TYPE: baremetal
+FLAVOR: cluster
+POWER_TOOL: ipmitool
+
+ipmiUser: Administrator
+
+hosts:
+  - name: host1
+    mac: 'C4:34:6B:C7:55:8C'
+    ipmiPass: '75169715'
+    ipmiIp: 172.25.14.122
+    roles:
+      - controller
+      - ha
+      - compute
+
+  - name: host2
+    mac: 'C4:34:6B:C7:68:BC'
+    ipmiPass: '14241782'
+    ipmiIp: 172.25.14.123
+    roles:
+      - controller
+      - ha
+      - compute
+  
+  - name: host3
+    mac: 'C4:34:6B:C7:76:B4'
+    ipmiPass: '03164278'
+    ipmiIp: 172.25.14.124
+    roles:
+      - controller
+      - ha
+      - compute
+
+  - name: host4
+    mac: 'C4:34:6B:C7:E4:9C'
+    ipmiPass: '68547271'
+    ipmiIp: 172.25.14.125
+    roles:
+      - compute
+
+  - name: host5
+    mac: 'C4:34:6B:C7:74:2C'
+    ipmiPass: '81623537'
+    ipmiIp: 172.25.14.126
+    roles:
+      - compute

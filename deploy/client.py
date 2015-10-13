@@ -216,6 +216,9 @@ opts = [
     cfg.StrOpt('repo_name',
               help='repo name',
               default=''),
+    cfg.StrOpt('ceph_disk',
+              help='ceph disk',
+              default=''),
 ]
 CONF.register_cli_opts(opts)
 

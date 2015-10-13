@@ -17,17 +17,6 @@ function install_compass_core() {
     local inventory_file=$compass_vm_dir/inventory.file
     log_info "install_compass_core enter"
     sed -i "s/mgmt_next_ip:.*/mgmt_next_ip: ${COMPASS_SERVER}/g" $WORK_DIR/installer/compass-install/install/group_vars/all
-
-    if [[ -n $OS_DIR ]]; then
-        ssh $ssh_args root@$MGMT_IP mkdir -p /var/cobbler/redhat/iso/
-        scp  $ssh_args $OS_DIR/*.iso root@$MGMT_IP:/var/cobbler/redhat/iso/
-    fi
-
-    if [[ -n $REPO_DIR ]]; then
-        ssh $ssh_args root@$MGMT_IP mkdir -p /var/cobbler/redhat/ppa/
-        scp $ssh_args $REPO_DIR/*.tar.gz root@$MGMT_IP:/var/cobbler/redhat/ppa/
-    fi
-
     echo "compass_nodocker ansible_ssh_host=$MGMT_IP ansible_ssh_port=22" > $inventory_file
     PYTHONUNBUFFERED=1 ANSIBLE_FORCE_COLOR=true ANSIBLE_HOST_KEY_CHECKING=false ANSIBLE_SSH_ARGS='-o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=60s' python /usr/local/bin/ansible-playbook -e pipeline=true --private-key=$rsa_file --user=root --connection=ssh --inventory-file=$inventory_file $WORK_DIR/installer/compass-install/install/compass_nodocker.yml
     exit_status=$?
@@ -42,8 +31,6 @@ function wait_ok() {
     set +x
     log_info "wait_compass_ok enter"
     retry=0
-    ssh-keygen -f "/root/.ssh/known_hosts" -R $MGMT_IP
-
     until timeout 1s ssh $ssh_args root@$MGMT_IP "exit" >/dev/null 2>&1
     do
         log_progress "os install time used: $((retry*100/$1))%"
@@ -76,7 +63,26 @@ function launch_compass() {
     sudo umount $old_mnt
 
     chmod 755 -R $new_mnt
-    sed -i -e "s/REPLACE_MGMT_IP/$MGMT_IP/g" -e "s/REPLACE_MGMT_NETMASK/$MGMT_MASK/g" -e "s/REPLACE_INSTALL_IP/$COMPASS_SERVER/g" -e "s/REPLACE_INSTALL_NETMASK/$INSTALL_MASK/g" -e "s/REPLACE_GW/$MGMT_GW/g" $new_mnt/isolinux/isolinux.cfg
+
+    cp $COMPASS_DIR/util/isolinux.cfg $new_mnt/isolinux/ -f
+
+    sed -i -e "s/REPLACE_MGMT_IP/$MGMT_IP/g" \
+           -e "s/REPLACE_MGMT_NETMASK/$MGMT_MASK/g" \
+           -e "s/REPLACE_GW/$MGMT_GW/g" \
+           -e "s/REPLACE_INSTALL_IP/$COMPASS_SERVER/g" \
+           -e "s/REPLACE_INSTALL_NETMASK/$INSTALL_MASK/g" \
+           -e "s/REPLACE_COMPASS_EXTERNAL_NETMASK/$COMPASS_EXTERNAL_MASK/g" \
+           -e "s/REPLACE_COMPASS_EXTERNAL_IP/$COMPASS_EXTERNAL_IP/g" \
+           -e "s/REPLACE_COMPASS_EXTERNAL_GW/$COMPASS_EXTERNAL_GW/g" \
+           $new_mnt/isolinux/isolinux.cfg
+
+    if [[ -n $COMPASS_DNS1 ]]; then
+        sed -i -e "s/REPLACE_COMPASS_DNS1/$COMPASS_DNS1/g" $new_mnt/isolinux/isolinux.cfg
+    fi
+
+    if [[ -n $COMPASS_DNS2 ]]; then
+        sed -i -e "s/REPLACE_COMPASS_DNS2/$COMPASS_DNS2/g" $new_mnt/isolinux/isolinux.cfg
+    fi
 
     ssh-keygen -f $new_mnt/bootstrap/boot.rsa -t rsa -N ''
     cp $new_mnt/bootstrap/boot.rsa $rsa_file
@@ -94,7 +100,8 @@ function launch_compass() {
         -e "s#REPLACE_IMAGE#$compass_vm_dir/disk.img#g" \
         -e "s#REPLACE_ISO#$compass_vm_dir/centos.iso#g" \
         -e "s/REPLACE_NET_MGMT/mgmt/g" \
-        -e "s/REPLACE_BRIDGE_INSTALL/br_install/g" \
+        -e "s/REPLACE_NET_INSTALL/install/g" \
+        -e "s/REPLACE_NET_EXTERNAL/external/g" \
         $COMPASS_DIR/deploy/template/vm/compass.xml \
         > $WORK_DIR/vm/compass/libvirt.xml
 

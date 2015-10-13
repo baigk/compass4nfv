@@ -5,6 +5,7 @@ provider_net_mappings:
   - name: br-prv
     network: physnet
     interface: eno2
+#    interface: eno2
     type: ovs
     role:
       - controller
@@ -13,6 +14,7 @@ provider_net_mappings:
 sys_intf_mappings:
   - name: mgmt
     interface: eno2
+#    interface: eno2
     vlan_tag: 101
     type: vlan
     role:
@@ -21,6 +23,7 @@ sys_intf_mappings:
 
   - name: storage
     interface: eno2
+#    interface: eno2
     vlan_tag: 102
     type: vlan
     role:

@@ -12,9 +12,8 @@
     - nfs
 
 - include: glance_config.yml
-  run_once: True
+  when: inventory_hostname == groups['controller'][0]
   tags:
     - config
     - glance_config
     - glance
-

@@ -27,7 +27,7 @@
   shell:  mkdir -p /etc/init.d
 
 - name: copy boot scripts
-  copy:  src={{ item }} dest=/etc/init.d mode=0755 force=yes
+  copy:  src={{ item }} dest=/etc/init.d/ mode=0755 force=yes
   with_items:
     - setup_networks/net_init
 

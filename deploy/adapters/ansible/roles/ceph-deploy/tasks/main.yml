@@ -5,6 +5,7 @@
     - ceph_deploy
     - ceph_setup_env
     - ceph_install
+    - ceph_openstack_conf
 
 - include: ceph_install_Debian.yml
   when: inventory_hostname == groups['controller'][0] and ansible_os_family == "Debian"

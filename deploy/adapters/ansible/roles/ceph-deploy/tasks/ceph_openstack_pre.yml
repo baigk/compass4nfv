@@ -1,7 +1,7 @@
 ---
 
 - name: create pool
-  shell: ceph osd pool create {{ item }} 60
+  shell: ceph osd pool create {{ item }} 50
   with_items:
     - volumes
     - images

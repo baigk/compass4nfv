@@ -2,10 +2,17 @@ nic_mappings: []
 bond_mappings: []
 
 provider_net_mappings:
-  - name: br-prv
-    network: physnet
+  - name: br-ex
+    network: external
     interface: eno2
-#    interface: eno2
+    type: ovs
+    role:
+      - controller
+      - compute
+
+  - name: br-tenant
+    network: base
+    interface: ens1f0
     type: ovs
     role:
       - controller
@@ -14,7 +21,6 @@ provider_net_mappings:
 sys_intf_mappings:
   - name: mgmt
     interface: eno2
-#    interface: eno2
     vlan_tag: 101
     type: vlan
     role:
@@ -23,7 +29,6 @@ sys_intf_mappings:
 
   - name: storage
     interface: eno2
-#    interface: eno2
     vlan_tag: 102
     type: vlan
     role:
@@ -31,8 +36,9 @@ sys_intf_mappings:
       - compute
 
   - name: external
-    interface: br-prv
-    type: ovs
+    interface: br-ex
+    vlan_tag: 524
+    type: vlan
     role:
       - controller
       - compute

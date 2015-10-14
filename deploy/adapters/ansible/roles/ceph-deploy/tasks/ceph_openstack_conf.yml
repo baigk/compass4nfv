@@ -1,6 +1,6 @@
 ---
 - name: chown of glance/api.log
-  shell: ssh -o StrictHostKeyChecking=no {{ item }} -t "chown glance:glance /var/log/glance/api.log"
+  shell: ssh -o StrictHostKeyChecking=no {{ item }} -t "chown glance:glance /var/log/glance"
   with_items:
     - "{{ groups['controller'] }}"
   tags:

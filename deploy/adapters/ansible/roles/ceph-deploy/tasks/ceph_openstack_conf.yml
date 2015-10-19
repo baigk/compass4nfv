@@ -30,9 +30,9 @@
   tags:
     - ceph_conf_cinder
 
-- name: modify nova.conf for ceph
-  shell: ssh -o StrictHostKeyChecking=no {{ item }} -t "sed -i 's/^\(images_type\).*/\1 = rbd/' /etc/nova/nova-compute.conf && sed -i 's/^\(rbd_secret_uuid\).*/\1 = {{ ceph_uuid.stdout_lines[0] }}/g' /etc/nova/nova-compute.conf  && sed -i '/^\[libvirt/a images_rbd_pool = vms\nimages_rbd_ceph_conf = /etc/ceph/ceph.conf\nrbd_user = cinder\nrbd_secret_uuid = {{ ceph_uuid.stdout_lines[0] }}\ndisk_cachemodes=\"network=writeback\"\nlive_migration_flag=\"VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST,VIR_MIGRATE_TUNNELLED\"' /etc/nova/nova-compute.conf && service {{ nova_service }} restart"
-  with_items:
-    - "{{ groups['compute'] }}"
-  tags:
-    - ceph_conf_nova
+#- name: modify nova.conf for ceph
+#  shell: ssh -o StrictHostKeyChecking=no {{ item }} -t "sed -i 's/^\(images_type\).*/\1 = rbd/' /etc/nova/nova-compute.conf && sed -i 's/^\(rbd_secret_uuid\).*/\1 = {{ ceph_uuid.stdout_lines[0] }}/g' /etc/nova/nova-compute.conf  && sed -i '/^\[libvirt/a images_rbd_pool = vms\nimages_rbd_ceph_conf = /etc/ceph/ceph.conf\nrbd_user = cinder\nrbd_secret_uuid = {{ ceph_uuid.stdout_lines[0] }}\ndisk_cachemodes=\"network=writeback\"\nlive_migration_flag=\"VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST,VIR_MIGRATE_TUNNELLED\"' /etc/nova/nova-compute.conf && service {{ nova_service }} restart"
+#  with_items:
+#    - "{{ groups['compute'] }}"
+#  tags:
+#    - ceph_conf_nova

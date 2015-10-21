@@ -61,3 +61,4 @@
   roles:
     - ceph-deploy
     - monitor
+    - secgroup

@@ -42,4 +42,3 @@ echo "mount osd"
 mkdir -p /var/local/osd
 mount /dev/ceph-volumes/ceph0 /var/local/osd
 fi
-

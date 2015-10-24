@@ -2,6 +2,8 @@
 packages:
   - ceph-deploy
   - ceph
+  - calamari-server
+  - calamari-clients
 
 services:
   - openstack-cinder-volume

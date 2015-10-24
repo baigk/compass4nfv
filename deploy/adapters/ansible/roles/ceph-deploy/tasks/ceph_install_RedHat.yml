@@ -1,26 +1,55 @@
 ---
+- name: init calamari
+  shell: calamari-ctl initialize --admin-username admin --admin-password admin --admin-email admin@huawei.com
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
+  tags:
+    - create_ceph_cluster
+
+- name: set apache2 listen port
+  lineinfile:
+    dest: /etc/httpd/conf/httpd.conf
+    insertafter: 'Listen {{ internal_ip }}:80'
+    line: 'Listen {{ internal_ip }}:8080'
+
+- name: set virtual host listen port
+  template: src=calamari.j2 dest=/etc/httpd/conf.d/calamari.conf mode=0755
+
+- name: restart httpd services
+  service: name=httpd state=restarted enabled=yes
+
 - name: create ceph cluster
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy new {{ ceph_cluster_hosts.stdout_lines[0] }}
+  shell: ceph-deploy new {{ inventory_hostname }}
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
   tags:
     - create_ceph_cluster
 
 - name: install ceph-mon for every nodes includes jumpserver
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy install --mon {{ ceph_cluster_hosts.stdout_lines[0]}}
+  shell: ceph-deploy install --mon {{ inventory_hostname}}
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
 
 - name: install ceph-osd for controller node
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy install --osd {{ item }}
+  shell: ceph-deploy install --osd {{ item }}
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
   with_items:
     - "{{ groups['compute'] }}"
 
 - name: create monitor node
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy mon create-initial
+  shell: ceph-deploy mon create-initial
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
   ignore_errors: True
 
 - name: sleep for monitor node
   shell: sleep 20
 
 - name: create monitor node again for double check
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy mon create-initial 
+  shell: ceph-deploy mon create-initial
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
   ignore_errors: True
 
 - name: copy create_osd.sh to host1
@@ -44,15 +73,18 @@
   ignore_errors: True
 
 - name: prepare create osd
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd prepare {{ item }}:/var/local/osd
+  shell: ceph-deploy osd prepare {{ item }}:/var/local/osd
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
   with_items:
     - "{{ groups['compute'] }}"
   tags:
     - create_osd
 
-
 - name: activate osd
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy osd activate {{ item }}:/var/local/osd
+  shell: ceph-deploy osd activate {{ item }}:/var/local/osd
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
   with_items:
     - "{{ groups['compute'] }}"
   tags:
@@ -60,4 +92,11 @@
     - activate_osd
 
 - name: create admin node
-  shell: cd {{ ceph_cluster_dir[0] }} && ceph-deploy admin {{ ceph_cluster_hosts.stdout_lines[0] }}
+  shell: ceph-deploy admin {{ inventory_hostname }}
+  args:
+    chdir: '{{ ceph_cluster_dir }}'
+
+- name: connect all nodes to calamari
+  shell: ceph-deploy calamari connect --master {{ internal_ip }} {{ inventory_hostname }}
+  args:
+    chdir: '{{ ceph_cluster_dir }}'

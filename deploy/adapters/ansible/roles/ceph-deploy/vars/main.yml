@@ -3,5 +3,4 @@ packages_noarch: []
 
 services_noarch: []
 
-ceph_cluster_dir:
-  - /root/ceph-cluster
+ceph_cluster_dir: /root/ceph-cluster
